@@ -1,0 +1,28 @@
+{
+  "name": "betty",
+  "version": "0.1.0",
+  "description": "An Amazon Echo app to get public transit information.",
+  "main": "server/app.js",
+  "private": true,
+  "dependencies": {
+    "express": "^4.12.4"
+  },
+  "devDependencies": {
+    "jshint": "^2.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakerella/betty.git"
+  },
+  "author": "Jordan Kasper",
+  "license": "MIT",
+  "homepage": "https://jordankasper.com:8989",
+  "scripts": {
+    "start": "node server/app.js",
+    "pretest": "./node_modules/jshint/bin/jshint .",
+    "test": "echo '>>> No tests currently created!'"
+  },
+  "engines": {
+    "node": "0.12.4"
+  }
+}
