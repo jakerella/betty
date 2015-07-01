@@ -1,7 +1,7 @@
 'use strict';
 
-var path = require('path'),
-    express = require('express'),
+var express = require('express'),
+    bodyParser = require('body-parser'),
     staticRoutes = require('./routes/static'),
     voiceRoutes = require('./routes/voice');
 
@@ -10,6 +10,8 @@ var path = require('path'),
 
 var server = express();
 server.set('port', process.env.PORT || 3000);
+
+server.use(bodyParser.json());
 
 server.use('/', staticRoutes);
 server.use('/voice', voiceRoutes);
@@ -24,6 +26,12 @@ server.use(require('./errorHandler')());
 
 // ------------------- Main Server Startup ------------------ //
 
-server.listen(server.get('port'), function() {
-    console.info('Betty is listening on port ' + server.get('port'));
-});
+if (require.main === module) {
+
+    server.listen(server.get('port'), function() {
+        console.info('Betty is listening on port ' + server.get('port'));
+    });
+    
+} else {
+    module.exports = server;
+}

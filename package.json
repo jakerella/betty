@@ -5,10 +5,13 @@
   "main": "server/app.js",
   "private": true,
   "dependencies": {
+    "body-parser": "^1.13.1",
     "express": "^4.12.4"
   },
   "devDependencies": {
-    "jshint": "^2.7.0"
+    "jshint": "^2.7.0",
+    "mocha": "^2.2.5",
+    "supertest": "^1.0.1"
   },
   "repository": {
     "type": "git",
@@ -20,7 +23,7 @@
   "scripts": {
     "start": "node server/app.js",
     "pretest": "./node_modules/jshint/bin/jshint .",
-    "test": "echo '>>> No tests currently created!'"
+    "test": "./node_modules/mocha/bin/mocha test/"
   },
   "engines": {
     "node": "0.12.4"
