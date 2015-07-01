@@ -2,8 +2,8 @@
 
 var path = require('path'),
     express = require('express'),
-    staticPages = require('./routes/static'),
-    voice = require('./routes/voice');
+    staticRoutes = require('./routes/static'),
+    voiceRoutes = require('./routes/voice');
 
 
 // ---------------- Primary Server Config --------------- //
@@ -11,8 +11,8 @@ var path = require('path'),
 var server = express();
 server.set('port', process.argv[2] || 8989);
 
-server.use('/', staticPages);
-server.use('/api', voice);
+server.use('/', staticRoutes);
+server.use('/voice', voiceRoutes);
 
 server.use(function(req, res, next) {
     var err = new Error('Sorry, but that is not a valid command');
