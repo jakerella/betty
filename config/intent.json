@@ -1,0 +1,30 @@
+{
+  "intents": [
+    {
+      "intent": "NextBus",
+      "slots": [
+        {
+          "name": "Stop",
+          "type": "LITERAL"
+        },
+        {
+          "name": "Number",
+          "type": "LITERAL"
+        }
+      ]
+    },
+    {
+      "intent": "NextTrain",
+      "slots": [
+        {
+          "name": "Station",
+          "type": "LITERAL"
+        },
+        {
+          "name": "Line",
+          "type": "LITERAL"
+        }
+      ]
+    }
+  ]
+}

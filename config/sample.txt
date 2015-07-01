@@ -1,0 +1,55 @@
+NextBus  when is the next bus
+NextBus  when's the next bus
+NextBus  how long until the next bus
+NextBus  how long til the next bus
+NextBus  when is the next {sixty two|Number} bus
+NextBus  when's the next {sixty two|Number} bus
+NextBus  how long until the next {sixty two|Number} bus
+NextBus  when is the next {seventy|Number} bus
+NextBus  when is the next {number sixty two|Number} bus
+NextBus  when is the next {number seventy|Number} bus
+NextBus  when the next bus is arriving
+NextBus  when will the next bus arrive
+NextBus  how long until the next bus arrives
+NextBus  how long til the next bus arrives
+NextBus  when is the next {number sixty two|Number} bus arriving
+NextBus  when's the next {number sixty two|Number} bus arriving
+NextBus  when is the next {seventy|Number} bus arriving
+NextBus  when is the next {number seventy|Number} bus arriving
+NextBus  tell me when the next bus arrives
+NextBus  tell me when the next bus is arriving
+NextBus  when is the next bus at {fifth and quintana|Stop}
+NextBus  when is the next bus arriving at {fifth and quintana|Stop}
+NextBus  when is the next bus arriving to {fifth and quintana|Stop}
+NextBus  when's the next bus at {fifth and quintana|Stop}
+NextBus  when is the next bus at {fifth street and quintana place|Stop}
+NextBus  when the next bus will arrive at {fifth and quintana|Stop}
+NextBus  when the next bus will arrive to {fifth and quintana|Stop}
+NextBus  when will the next bus arrive at {fifth and quintana|Stop}
+NextBus  when will the next bus arrive to {fifth and quintana|Stop}
+NextBus  when the next bus will arrive at {fifth street and quintana place|Stop}
+NextBus  when the next bus will arrive at {fifth street and quintana|Stop}
+NextBus  when the next bus will arrive at {fifth and quintana place|Stop}
+NextBus  when the next bus will arrive at {takoma station|Stop}
+NextBus  when is the next {sixty two|Number} bus at {fifth and quintana|Stop}
+NextBus  when's the next {sixty two|Number} bus at {fifth and quintana|Stop}
+NextBus  when is the next {seventy|Number} bus at {fifth and quintana|Stop}
+NextBus  when is the next {number sixty two|Number} bus at {fifth and quintana|Stop}
+NextBus  when is the next {number seventy|Number} bus at {fifth and quintana|Stop}
+NextBus  when is the next {sixty two|Number} bus at {fifth street and quintana place|Stop}
+NextBus  when is the next {seventy|Number} bus at {fifth street and quintana place|Stop}
+NextBus  when is the next {number sixty two|Number} bus at {fifth street and quintana place|Stop}
+NextBus  when is the next {number seventy|Number} bus at {fifth street and quintana place|Stop}
+NextBus  when's the next {number seventy|Number} bus at {fifth street and quintana place|Stop}
+NextBus  when is the next {sixty two|Number} bus at {fifth street and quintana|Stop}
+NextBus  when is the next {seventy|Number} bus at {fifth street and quintana|Stop}
+NextBus  when is the next {number sixty two|Number} bus at {fifth street and quintana|Stop}
+NextBus  when is the next {number seventy|Number} bus at {fifth street and quintana|Stop}
+NextBus  when is the next {sixty two|Number} bus at {fifth and quintana place|Stop}
+NextBus  when is the next {seventy|Number} bus at {fifth and quintana place|Stop}
+NextBus  when is the next {number sixty two|Number} bus at {fifth and quintana place|Stop}
+NextBus  when is the next {number seventy|Number} bus at {fifth and quintana place|Stop}
+NextBus  when is the next {sixty two|Number} bus at {takoma station|Stop}
+NextBus  when is the next {seventy|Number} bus at {takoma station|Stop}
+NextBus  when is the next {number sixty two|Number} bus at {takoma station|Stop}
+NextBus  when is the next {number seventy|Number} bus at {takoma station|Stop}
