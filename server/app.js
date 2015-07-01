@@ -9,7 +9,7 @@ var path = require('path'),
 // ---------------- Primary Server Config --------------- //
 
 var server = express();
-server.set('port', process.argv[2] || 8989);
+server.set('port', process.env.PORT || 3000);
 
 server.use('/', staticRoutes);
 server.use('/voice', voiceRoutes);
