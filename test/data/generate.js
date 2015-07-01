@@ -80,7 +80,8 @@ module.exports = function() {
     
     return {
         getLaunchRequest: getLaunchRequest,
-        getIntentRequest: getIntentRequest
+        getIntentRequest: getIntentRequest,
+        getEndRequest: getEndRequest
     };
     
 };
