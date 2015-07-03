@@ -1,6 +1,7 @@
 'use strict';
 
-var express = require('express'),
+var debug = require('debug')('betty:routes:voice'),
+    express = require('express'),
     router = express.Router();
 
 router.get('/foo', function(req, res) {
