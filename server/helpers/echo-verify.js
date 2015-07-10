@@ -1,6 +1,6 @@
 'use strict';
 
-var debug = require('debug')('betty:echo:meta'),
+var debug = require('debug')('echo:verify'),
     path = require('path'),
     url = require('url'),
     https = (process.env.NODE_ENV === 'development') ? require('http') : require('https'),
@@ -19,14 +19,20 @@ function VerifyError() {
 }
 
 
-function verifySignature(req) { return new Promise(function (resolve, reject) {
-    var sigUrl, sigParsed, nowGMT, reqTimestamp;
+function verifySignature(headers, rawBody) { return new Promise(function (resolve, reject) {
+    var body, sigUrl, sigParsed, nowGMT, reqTimestamp;
     
-    if (!req.headers.signaturecertchainurl || !req.headers.signature) {
+    try {
+        body = JSON.parse(rawBody);
+    } catch(e) {
+        return reject(new VerifyError('Echo request body is not valid JSON'));
+    }
+    
+    if (!headers.signaturecertchainurl || !headers.signature) {
         return reject(new VerifyError('Missing Echo signature headers on request'));
     }
     
-    sigUrl = path.normalize(req.headers.signaturecertchainurl);
+    sigUrl = path.normalize(headers.signaturecertchainurl);
     sigUrl = sigUrl.replace(/^http(s?):\/([^\/])/, 'http$1://$2');
     
     debug('Cert data URL', sigUrl);
@@ -38,11 +44,11 @@ function verifySignature(req) { return new Promise(function (resolve, reject) {
         sigParsed.hostname.toLowerCase() !== 's3.amazonaws.com' ||
         !/^\/echo\.api\//i.test(sigParsed.path) ||
         (sigParsed.port && sigParsed.port !== 443))) {
-        return reject(new VerifyError('Invalid Echo signature URL (' + req.headers.signaturecertchainurl + ')'));
+        return reject(new VerifyError('Invalid Echo signature URL (' + headers.signaturecertchainurl + ')'));
     }
     
     nowGMT = convertToGMT(new Date()).getTime();
-    reqTimestamp = convertToGMT(new Date(req.body.request && req.body.request.timestamp));
+    reqTimestamp = convertToGMT(new Date(body.request && body.request.timestamp));
     reqTimestamp = (reqTimestamp && reqTimestamp.getTime()) || 0;
     
     if (!reqTimestamp || (nowGMT - reqTimestamp) > MAX_REQUEST_AGE) {
@@ -63,13 +69,14 @@ function verifySignature(req) { return new Promise(function (resolve, reject) {
                 .then(function(certParts) {
                     var verifier = crypto.createVerify('SHA1');
                     
-                    verifier.update(req.rawBody);
+                    verifier.update(rawBody);
                     
                     if (process.env.NODE_ENV === 'development' ||
-                        verifier.verify(certData, req.headers.signature, 'base64')) {
-                        resolve({
-                            signatureUrl: sigUrl
-                        });
+                        verifier.verify(certData, headers.signature, 'base64')) {
+                        
+                        debug('Echo request verified using', sigUrl);
+                        resolve();
+                        
                     } else {
                         reject(new VerifyError('Unable to verify request body with signature.'));
                     }
@@ -131,21 +138,11 @@ function verifyCertificate(certData) { return new Promise(function (resolve, rej
 
 // --------------- Public methods ----------------- //
 
-function validateRequest(req, res, next) {
-    var err = new VerifyError('Malformed request signature detected. Request logged.');
-    err.status = 400;
+function validateRequest(headers, rawBody, cb) {
     
-    verifySignature(req)
-        .then(function(data) {
-            debug('Echo request verified using', data.signatureUrl);
-            
-            next();
-        })
-        .catch(function(e) {
-            console.trace(e);
-            console.error('Unable to verify request signature', req.ip);
-            next(err);
-        });
+    verifySignature(headers, rawBody)
+        .then(cb)
+        .catch(cb);
 }
 
 
