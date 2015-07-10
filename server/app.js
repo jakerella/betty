@@ -13,7 +13,11 @@ debug('Creating express application and configuring');
 var server = express();
 server.set('port', process.env.PORT || 3000);
 
-server.use(bodyParser.json());
+server.use(bodyParser.json({
+    verify: function(req, res, buf, encoding) {
+        req.rawBody = buf.toString();
+    }
+}));
 
 
 debug('Setting up app routes');

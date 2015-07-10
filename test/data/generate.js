@@ -2,7 +2,7 @@
 module.exports = function() {
     
     function getLaunchRequest() {
-        {
+        return {
             "version": "1.0",
             "session": {
                 "new": true,
@@ -19,12 +19,12 @@ module.exports = function() {
                 "type": "LaunchRequest",
                 "requestId": "amzn1.echo-api.request.0000000-0000-0000-0000-00000000007",
                 "timestamp": "2015-07-01T12:34:56Z"
-              }
+            }
         };
     }
     
     function getIntentRequest() {
-        {
+        return {
             "version": "1.0",
             "session": {
                 "new": false,
@@ -55,7 +55,7 @@ module.exports = function() {
     }
     
     function getEndRequest() {
-        {
+        return {
             "version": "1.0",
             "session": {
                 "new": false,
@@ -73,7 +73,7 @@ module.exports = function() {
                 "requestId": "amzn1.echo-api.request.0000000-0000-0000-0000-00000000009",
                 "timestamp": "2015-07-01T12:35:03Z",
                 "reason": "USER_INITIATED"
-              }
+            }
         };
     }
     

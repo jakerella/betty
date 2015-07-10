@@ -1,6 +1,7 @@
 'use strict';
 
 var debug = require('debug')('betty:routes:static'),
+    path = require('path'),
     express = require('express'),
     router = express.Router();
 
@@ -25,5 +26,11 @@ router.get('/', function(req, res) {
         'uptime': getUptime()
     });
 });
+
+if (process.env.NODE_ENV === 'development') {
+    router.get('/echo-api.pem', function(req, res) {
+        res.sendFile(path.join(__dirname, '..', '..', 'test', 'data', 'echo-api.pem'));
+    });
+}
 
 module.exports = router;
