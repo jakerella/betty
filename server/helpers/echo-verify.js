@@ -28,6 +28,14 @@ function verifySignature(headers, rawBody) { return new Promise(function (resolv
         return reject(new VerifyError('Echo request body is not valid JSON'));
     }
     
+    if (!process.env.ECHO_APP_ID) {
+        return reject(new VerifyError('Echo application ID environment variable is not set.'));
+    }
+    if (!body.session || !body.session.application ||
+        body.session.application.applicationId !== process.env.ECHO_APP_ID) {
+        return reject(new VerifyError('Echo request application ID does not match'));
+    }
+    
     if (!headers.signaturecertchainurl || !headers.signature) {
         return reject(new VerifyError('Missing Echo signature headers on request'));
     }
