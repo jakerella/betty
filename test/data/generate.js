@@ -1,78 +1,93 @@
 
-module.exports = function() {
+module.exports = function(appId) {
     
-    function getLaunchRequest() {
+    var VERSION = '1.0',
+        DEFAULT_SESSION = 'amzn1.echo-api.session.0000000-0000-0000-0000-00000000042',
+        DEFAULT_USER = 'amzn1.account.AM3B00000000000000000000013';
+    
+    appId = appId || 'amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-000000000000';
+    
+    
+    function getSession(isNew, sessionId, userId) {
+        sessionId = sessionId || DEFAULT_SESSION;
+        userId = userId || DEFAULT_USER;
+        
         return {
-            "version": "1.0",
-            "session": {
-                "new": true,
-                "sessionId": "amzn1.echo-api.session.0000000-0000-0000-0000-00000000042",
-                "application": {
-                    "applicationId": "amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-000000d00ebe"
-                },
-                "attributes": {},
-                "user": {
-                    "userId": "amzn1.account.AM3B00000000000000000000013"
-                }
+            'new': isNew,
+            'sessionId': sessionId,
+            'application': {
+                'applicationId': appId
             },
-            "request": {
-                "type": "LaunchRequest",
-                "requestId": "amzn1.echo-api.request.0000000-0000-0000-0000-00000000007",
-                "timestamp": "2015-07-01T12:34:56Z"
+            'attributes': {},
+            'user': {
+                'userId': userId
             }
         };
     }
     
-    function getIntentRequest() {
+    function getTimestamp() {
+        return (new Date()).toISOString();
+    }
+    
+    
+    function getLaunchRequest(options) {
+        options = options || {};
+        
         return {
-            "version": "1.0",
-            "session": {
-                "new": false,
-                "sessionId": "amzn1.echo-api.session.0000000-0000-0000-0000-00000000042",
-                "application": {
-                    "applicationId": "amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-000000d00ebe"
-                },
-                "attributes": {},
-                "user": {
-                    "userId": "amzn1.account.AM3B00000000000000000000013"
+            'version': VERSION,
+            'session': getSession(true, options.sessionId, options.userId),
+            'request': {
+                'type': 'LaunchRequest',
+                'requestId': 'amzn1.echo-api.request.0000000-0000-0000-0000-00000000007',
+                'timestamp': getTimestamp()
+            }
+        };
+    }
+    
+    function getIntentRequest(options) {
+        var name, slots = {};
+        
+        options = options || {};
+        
+        if (options.slots) {
+            for (name in options.slots) {
+                if (options.slots.hasOwnProperty(name)) {
+                    slots[name] = {
+                        name: name,
+                        value: options.slots[name]
+                    };
                 }
-            },
-            "request": {
-                "type": "IntentRequest",
-                "requestId": "amzn1.echo-api.request.0000000-0000-0000-0000-00000000008",
-                "timestamp": "2015-07-01T12:35:01Z",
-                "intent": {
-                    "name": "NextBusIntent",
-                    "slots": {
-                        "Stop": {
-                            "name": "Stop",
-                            "value": "fifth and quintana"
-                        }
-                    }
+            }
+        }
+        
+        return {
+            'version': VERSION,
+            'session': getSession(true, options.sessionId, options.userId),
+            'request': {
+                'type': 'IntentRequest',
+                'requestId': 'amzn1.echo-api.request.0000000-0000-0000-0000-00000000008',
+                'timestamp': getTimestamp(),
+                'intent': {
+                    'name': options.name,
+                    'slots': slots
                 }
             }
         };
     }
     
-    function getEndRequest() {
+    function getEndRequest(options) {
+        options = options || {};
+        
+        options.sessionId = options.sessionId || DEFAULT_SESSION;
+        
         return {
-            "version": "1.0",
-            "session": {
-                "new": false,
-                "sessionId": "amzn1.echo-api.session.0000000-0000-0000-0000-00000000042",
-                "application": {
-                    "applicationId": "amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-000000d00ebe"
-                },
-                "attributes": {},
-                "user": {
-                    "userId": "amzn1.account.AM3B00000000000000000000013"
-                }
-            },
-            "request": {
-                "type": "SessionEndedRequest",
-                "requestId": "amzn1.echo-api.request.0000000-0000-0000-0000-00000000009",
-                "timestamp": "2015-07-01T12:35:03Z",
-                "reason": "USER_INITIATED"
+            'version': VERSION,
+            'session': getSession(true, options.sessionId, options.userId),
+            'request': {
+                'type': 'SessionEndedRequest',
+                'requestId': 'amzn1.echo-api.request.0000000-0000-0000-0000-00000000009',
+                'timestamp': getTimestamp(),
+                'reason': 'USER_INITIATED'
             }
         };
     }

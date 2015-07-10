@@ -25,7 +25,7 @@
   "homepage": "https://jordankasper.com:8989",
   "scripts": {
     "start": "node server/app.js",
-    "pretest": "./node_modules/jshint/bin/jshint .",
+    "pretest": "echo \"\n    *** DON'T FORGET TO START THE APP IN ANOTHER TERMINAL!***\n\" && ./node_modules/jshint/bin/jshint .",
     "test": "./node_modules/mocha/bin/mocha test/"
   },
   "engines": {

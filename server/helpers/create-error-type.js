@@ -1,3 +1,4 @@
+'use strict';
 
 /**
  * Use this module to create new types of errors with the correct

@@ -14,7 +14,7 @@ var server = express();
 server.set('port', process.env.PORT || 3000);
 
 server.use(bodyParser.json({
-    verify: function(req, res, buf, encoding) {
+    verify: function(req, res, buf) {
         req.rawBody = buf.toString();
     }
 }));
