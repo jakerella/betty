@@ -42,12 +42,18 @@ function fireProperHandler(body, mod) { return new Promise(function (resolve, re
         typeof mod['handle' + body.request.intent.name] === 'function') {
         
         // for Intents we parse on the name and call the proper method
-        mod['handle' + body.request.intent.name](body, resolve);
+        mod['handle' + body.request.intent.name](body, function(err, data) {
+            if (err) { return reject(err); }
+            resolve(data);
+        });
         
     } else if (typeof mod['handle' + body.request.type] === 'function') {
         
         // Any other request type is handled generically
-        mod['handle' + body.request.type](body, resolve);
+        mod['handle' + body.request.type](body, function(err, data) {
+            if (err) { return reject(err); }
+            resolve(data);
+        });
         
     } else {
         err = new Error('Sorry, but that request type is not implemented');

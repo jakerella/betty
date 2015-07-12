@@ -80,7 +80,7 @@ function getCertData(sigUrl) { return new Promise(function (resolve, reject) {
                 debug('Retrieved cert data via file', filename[1]);
                 resolve(certData.toString());
             })
-            .catch(reject)
+            .catch(reject);
         
     } else {
     
@@ -99,7 +99,7 @@ function getCertData(sigUrl) { return new Promise(function (resolve, reject) {
 
 
 function verifySignature(headers, rawBody) { return new Promise(function (resolve, reject) {
-    var body, sigUrl, sigParsed, nowGMT, reqTimestamp;
+    var body, sigUrl, sigParsed, nowGMT, reqTimestamp, certData;
     
     try {
         body = JSON.parse(rawBody);
@@ -145,7 +145,10 @@ function verifySignature(headers, rawBody) { return new Promise(function (resolv
     debug('Verifying signature from URL:', sigUrl);
     
     getCertData(sigUrl)
-        .then(verifyCertificate)
+        .then(function(cert) {
+            certData = cert;
+            return verifyCertificate(certData);
+        })
         .then(function() {
             var verifier = crypto.createVerify('SHA1');
             
