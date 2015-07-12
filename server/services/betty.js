@@ -1,14 +1,38 @@
 'use strict';
 
 var debug = require('debug')('betty:service'),
-    debugBus = require('debug')('betty:service:bus');
+    debugBus = require('debug')('betty:service:bus'),
+    debugSetup = require('debug')('betty:service:setup');
 
 module.exports = function() {
     
     function getTransitKey(location) {
-        location = location || 'WAS';
+        var apiKey;
         
-        return process.env['TRANSIT_KEY_' + location];
+        location = location || 'WAS';
+        apiKey = process.env['TRANSIT_KEY_' + location];
+        
+        if (!apiKey) {
+            debugSetup('No api key found for transit in user\'s location.');
+        }
+        
+        return apiKey;
+    }
+    
+    function getLocationNotSupported() {
+        return {
+            response: {
+                outputSpeech: {
+                    type: 'PlainText',
+                    text: 'I\'m sorry, but I don\'t have any information for your location!'
+                },
+                shouldEndSession: true
+            }
+        };
+    }
+    
+    function getSetupInstructions() {
+        
     }
     
     function doLaunch(data, cb) {
@@ -42,14 +66,56 @@ module.exports = function() {
         });
     }
     
+    function doSaveStop(data, cb) {
+        var slots = data.request.slots || {},
+            apiKey = getTransitKey();
+        
+        debugSetup('Save request:', data.request);
+        
+        if (!apiKey) {
+            return process.nextTick(function() {
+                cb(null, getLocationNotSupported());
+            });
+        }
+        
+        if (!slots.StopId || !slots.Name) {
+            return process.nextTick(function() {
+                debug('No stop specified to save, asking about that...');
+                cb(null, {
+                    response: {
+                        outputSpeech: {
+                            type: 'PlainText',
+                            text: 'Please tell me the bus or train stop ID used by your transit system and the name you would like me to use.'
+                        },
+                        shouldEndSession: false
+                    }
+                });
+            });
+        }
+        
+        return process.nextTick(function() {
+            cb(null, {
+                response: {
+                    outputSpeech: {
+                        type: 'PlainText',
+                        text: 'Okay, I have saved that stop for you'
+                    },
+                    shouldEndSession: true
+                }
+            });
+        });
+        
+    }
+    
     function getNextBus(data, cb) {
         var slots = data.request.slots || {},
             apiKey = getTransitKey();
         
+        debugBus('Bus request:', data.request);
+        
         if (!apiKey) {
             return process.nextTick(function() {
-                debugBus('No api key found for transit');
-                cb(new Error('Sorry, but I wasn\'t able to retrieve your transit data!'));
+                cb(null, getLocationNotSupported());
             });
         }
         
@@ -76,7 +142,8 @@ module.exports = function() {
     return {
         handleLaunchRequest: doLaunch,
         handleSessionEndedRequest: doEndSession,
-        handleNextBus: getNextBus
+        handleNextBus: getNextBus,
+        handleSaveStop: doSaveStop
     };
     
 };
