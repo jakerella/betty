@@ -1,6 +1,13 @@
 {
   "intents": [
     {
+      "intent": "Cancel",
+      "slots": [{
+        "name": "Phrase",
+        "type": "LITERAL"
+      }]
+    },
+    {
       "intent": "SaveStop",
       "slots": [
         {
@@ -9,6 +16,10 @@
         },
         {
           "name": "StopId",
+          "type": "NUMBER"
+        },
+        {
+          "name": "Stop",
           "type": "LITERAL"
         }
       ]

@@ -66,6 +66,21 @@ module.exports = function() {
         });
     }
     
+    function cancelAction(data, cb) {
+        return process.nextTick(function() {
+            debug('Cancelling request...');
+            cb(null, {
+                response: {
+                    outputSpeech: {
+                        type: 'PlainText',
+                        text: 'buh bye'
+                    },
+                    shouldEndSession: true
+                }
+            });
+        });
+    }
+    
     function doSaveStop(data, cb) {
         var slots = data.request.intent.slots || {},
             apiKey = getTransitKey();
@@ -79,7 +94,9 @@ module.exports = function() {
             });
         }
         
-        if (!slots.StopId || !slots.StopId.value ||
+        // We must have a Name and either a StopId or Stop (name?)
+        if (((!slots.StopId || !slots.StopId.value) &&
+             (!slots.Stop || !slots.Stop.value)) ||
             !slots.Name || !slots.Name.value) {
             return process.nextTick(function() {
                 debug('No stop specified to save, asking about that...');
@@ -145,7 +162,8 @@ module.exports = function() {
         handleLaunchRequest: doLaunch,
         handleSessionEndedRequest: doEndSession,
         handleNextBus: getNextBus,
-        handleSaveStop: doSaveStop
+        handleSaveStop: doSaveStop,
+        handleCancel: cancelAction
     };
     
 };
