@@ -1,6 +1,7 @@
 'use strict';
 
 var debug = require('debug')('echo:verify'),
+    fs = require('fs'),
     path = require('path'),
     url = require('url'),
     https = (process.env.NODE_ENV === 'development') ? require('http') : require('https'),
@@ -10,7 +11,8 @@ var debug = require('debug')('echo:verify'),
 
 var MAX_REQUEST_AGE = (process.env.NODE_ENV === 'development') ? (99999999) : (150 * 1000);
 
-var readCertInfo = Promise.promisify(pem.readCertificateInfo),
+var readFile = Promise.promisify(fs.readFile),
+    readCertInfo = Promise.promisify(pem.readCertificateInfo),
     getPublicKey = Promise.promisify(pem.getPublicKey);
 
 
@@ -66,6 +68,36 @@ function verifyCertificate(certData) { return new Promise(function (resolve, rej
 }); }
 
 
+function getCertData(sigUrl) { return new Promise(function (resolve, reject) {
+    var filename = sigUrl.match(/^file\:(.+)/i);
+    
+    console.log(sigUrl);
+    
+    if (process.env.NODE_ENV === 'development' && filename) {
+        
+        readFile(filename[1])
+            .then(function(certData) {
+                debug('Retrieved cert data via file', filename[1]);
+                resolve(certData.toString());
+            })
+            .catch(reject)
+        
+    } else {
+    
+        https.get(sigUrl, function(res) {
+            var certData = '';
+            res.on('data', function(data) { certData += data; });
+            res.on('end', function() {
+                debug('Retrieved cert data via HTTP call to', sigUrl);
+                resolve(certData);
+            });
+
+        }).on('error', reject);
+    }
+    
+}); }
+
+
 function verifySignature(headers, rawBody) { return new Promise(function (resolve, reject) {
     var body, sigUrl, sigParsed, nowGMT, reqTimestamp;
     
@@ -112,36 +144,25 @@ function verifySignature(headers, rawBody) { return new Promise(function (resolv
     
     debug('Verifying signature from URL:', sigUrl);
     
-    https.get(sigUrl, function(res) {
-        var certData = '';
-        
-        res.on('data', function(data) { certData += data; });
-        
-        res.on('end', function() {
-            debug('Retrieved cert data');
+    getCertData(sigUrl)
+        .then(verifyCertificate)
+        .then(function() {
+            var verifier = crypto.createVerify('SHA1');
             
-            verifyCertificate(certData)
-                .then(function() {
-                    var verifier = crypto.createVerify('SHA1');
-                    
-                    verifier.update(rawBody);
-                    
-                    if (process.env.NODE_ENV === 'development' ||
-                        verifier.verify(certData, headers.signature, 'base64')) {
-                        
-                        debug('Echo request verified using', sigUrl);
-                        resolve();
-                        
-                    } else {
-                        reject(new VerifyError('Unable to verify request body with signature.'));
-                    }
-                    
-                })
-                .catch(reject);
+            verifier.update(rawBody);
             
-        });
-
-    }).on('error', reject);
+            if (process.env.NODE_ENV === 'development' ||
+                verifier.verify(certData, headers.signature, 'base64')) {
+                
+                debug('Echo request verified using', sigUrl);
+                resolve();
+                
+            } else {
+                reject(new VerifyError('Unable to verify request body with signature.'));
+            }
+            
+        })
+        .catch(reject);
      
 }); }
 

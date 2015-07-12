@@ -6,7 +6,8 @@ var debug = require('debug')('betty:routes:static'),
     router = express.Router();
 
 function getUptime() {
-    var sec = Math.round(((new Date()).getTime() - global.bettyStartTime) / 1000);
+    var now = (new Date()).getTime(),
+        sec = Math.round((now - global.bettyStartTime) / 1000);
     
     if (sec < 60) {
         return Math.round(sec) + ' seconds';

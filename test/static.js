@@ -10,13 +10,9 @@ describe('GET root', function(){
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)
             .expect(function(res) {
-                if (!res.body.name || res.body.name !== 'betty') {
-                    throw new Error('Application name is incorrect');
-                }
-                if (!res.body.purpose ||
-                    res.body.purpose !== 'Deliver public transit information via Amazon Echo') {
-                    throw new Error('Application purpose is incorrect');
-                }
+                assert.equal(res.body.name, 'betty');
+                assert.equal(res.body.purpose, 'Deliver public transit information via Amazon Echo');
+                assert.ok(/^[0-9\.]+\s(seconds|minutes|hours)$/.test(res.body.uptime));
             })
             .expect(200, done);
     });

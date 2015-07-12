@@ -48,5 +48,6 @@ if (require.main === module) {
     
 } else {
     module.exports = server;
+    global.bettyStartTime = (new Date()).getTime();
     debug('App required for tests');
 }

@@ -9,7 +9,7 @@ describe('launch betty', function(){
         request(server)
             .post('/voice/betty')
             .send(generate.getLaunchRequest())
-            .set('SignatureCertChainUrl', 'http://localhost:3000/echo-api.pem')
+            .set('SignatureCertChainUrl', 'file:///home/jordan/projects/betty/test/data/echo-api.pem')
             .set('Signature', 'foobar')
             .expect('Content-Type', /json/)
             .expect(function(res) {
