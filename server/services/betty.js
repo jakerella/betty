@@ -70,9 +70,8 @@ module.exports = function() {
         var slots = data.request.intent.slots || {},
             apiKey = getTransitKey();
         
-        debugSetup('Save request:', data);
-        debugSetup('Slots:', slots, slots.StopId, slots.Name);
-        
+        debugSetup('Save request:', data.request);
+        debugSetup('Slots:', slots);
         
         if (!apiKey) {
             return process.nextTick(function() {
@@ -80,7 +79,8 @@ module.exports = function() {
             });
         }
         
-        if (!slots.StopId || !slots.Name) {
+        if (!slots.StopId || !slots.StopId.value ||
+            !slots.Name || !slots.Name.value) {
             return process.nextTick(function() {
                 debug('No stop specified to save, asking about that...');
                 cb(null, {
