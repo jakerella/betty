@@ -73,7 +73,7 @@ module.exports = function() {
                 response: {
                     outputSpeech: {
                         type: 'PlainText',
-                        text: 'buh bye'
+                        text: 'bye bye'
                     },
                     shouldEndSession: true
                 }
@@ -82,11 +82,11 @@ module.exports = function() {
     }
     
     function doSaveStop(data, cb) {
-        var slots = data.request.intent.slots || {},
+        var stopId,
+            slots = data.request.intent.slots || {},
             apiKey = getTransitKey();
         
-        debugSetup('Save request:', data.request);
-        debugSetup('Slots:', slots);
+        debugSetup('Save request:', data);
         
         if (!apiKey) {
             return process.nextTick(function() {
@@ -112,12 +112,31 @@ module.exports = function() {
             });
         }
         
+        stopId = Number(slots.StopId.value) || slots.Stop.value;
+        
+        if (!stopId) {
+            return process.nextTick(function() {
+                debug('Invalid StopId', slots.StopId.value, slots.Stop.value);
+                cb(null, {
+                    response: {
+                        outputSpeech: {
+                            type: 'PlainText',
+                            text: 'Sorry, but I didn\'t understand that stop. Can you try again?'
+                        },
+                        shouldEndSession: false
+                    }
+                });
+            });
+        }
+        
+        debugSetup('Saving stop:', JSON.stringify(slots));
+        
         return process.nextTick(function() {
             cb(null, {
                 response: {
                     outputSpeech: {
                         type: 'PlainText',
-                        text: 'Okay, I have saved that stop for you'
+                        text: 'Okay, I saved stop ' + stopId +  ' as ' + slots.Name.value + ' for you.'
                     },
                     shouldEndSession: true
                 }

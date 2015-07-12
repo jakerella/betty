@@ -30,6 +30,12 @@ SaveStop  use {one two three|StopId} as {rittenhouse|Name}
 SaveStop  use {one two three|StopId} for {rittenhouse|Name}
 SaveStop  use {one two three four five|StopId} as {rittenhouse|Name}
 SaveStop  use {one two three four five|StopId} for {rittenhouse|Name}
+SaveStop  save {one zero zero one one nine five|StopId} as {rittenhouse|Name}
+SaveStop  save {one zero zero one one nine five|StopId} for {rittenhouse|Name}
+SaveStop  save {one two three|StopId} as {rittenhouse|Name}
+SaveStop  save {one two three|StopId} for {rittenhouse|Name}
+SaveStop  save {one two three four five|StopId} as {rittenhouse|Name}
+SaveStop  save {one two three four five|StopId} for {rittenhouse|Name}
 SaveStop  {one two three|StopId} and {rittenhouse|Name}
 SaveStop  {one two three|StopId} as {rittenhouse|Name}
 SaveStop  {one two three|StopId} is {rittenhouse|Name}
