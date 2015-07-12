@@ -71,6 +71,8 @@ module.exports = function() {
             apiKey = getTransitKey();
         
         debugSetup('Save request:', data.request);
+        debugSetup('Slots:', slots.StopId, slots.Name);
+        
         
         if (!apiKey) {
             return process.nextTick(function() {
@@ -85,7 +87,7 @@ module.exports = function() {
                     response: {
                         outputSpeech: {
                             type: 'PlainText',
-                            text: 'Please tell me the bus or train stop ID used by your transit system and the name you would like me to use.'
+                            text: 'Please tell me the stop ID used by your transit system and the name you would like me to use for it.'
                         },
                         shouldEndSession: false
                     }

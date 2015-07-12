@@ -71,8 +71,6 @@ function verifyCertificate(certData) { return new Promise(function (resolve, rej
 function getCertData(sigUrl) { return new Promise(function (resolve, reject) {
     var filename = sigUrl.match(/^file\:(.+)/i);
     
-    console.log(sigUrl);
-    
     if (process.env.NODE_ENV === 'development' && filename) {
         
         readFile(filename[1])

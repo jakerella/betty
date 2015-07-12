@@ -10,7 +10,25 @@ SaveStop  to remember a stop
 SaveStop  to remember my stop
 SaveStop  to remember a bus stop
 SaveStop  to remember my bus stop
+SaveStop  to save {one two three|StopId} as {Qunitana|Name}
+SaveStop  to save {one two three four five|StopId} as {Qunitana|Name}
 SaveStop  to save {one zero zero one one nine five|StopId} as {Qunitana|Name}
+SaveStop  to use {one zero zero one one nine five|StopId} as {Qunitana|Name}
+SaveStop  to use {one zero zero one one nine five|StopId} for {Qunitana|Name}
+SaveStop  to use {one two three|StopId} as {Qunitana|Name}
+SaveStop  to use {one two three|StopId} for {Qunitana|Name}
+SaveStop  use {one zero zero one one nine five|StopId} as {Qunitana|Name}
+SaveStop  use {one zero zero one one nine five|StopId} for {Qunitana|Name}
+SaveStop  use {one two three|StopId} as {Qunitana|Name}
+SaveStop  use {one two three|StopId} for {Qunitana|Name}
+SaveStop  use {one two three four five|StopId} as {Qunitana|Name}
+SaveStop  use {one two three four five|StopId} for {Qunitana|Name}
+SaveStop  {one two three|StopId} and {Qunitana|Name}
+SaveStop  {one two three|StopId} as {Qunitana|Name}
+SaveStop  {one two three|StopId} is {Qunitana|Name}
+SaveStop  {one two three four five|StopId} and {Qunitana|Name}
+SaveStop  {one two three four five|StopId} as {Qunitana|Name}
+SaveStop  {one two three four five|StopId} is {Qunitana|Name}
 
 
 NextBus   when is the next bus
