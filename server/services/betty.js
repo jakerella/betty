@@ -67,11 +67,11 @@ module.exports = function() {
     }
     
     function doSaveStop(data, cb) {
-        var slots = data.request.slots || {},
+        var slots = data.intent.slots || {},
             apiKey = getTransitKey();
         
-        debugSetup('Save request:', data.request);
-        debugSetup('Slots:', slots.StopId, slots.Name);
+        debugSetup('Save request:', data);
+        debugSetup('Slots:', slots, slots.StopId, slots.Name);
         
         
         if (!apiKey) {
