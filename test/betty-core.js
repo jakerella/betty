@@ -45,25 +45,19 @@ describe('launch and end betty', function(){
             })
             .expect(200, done);
     });
-});
-
-describe('NextBus intent with no slots', function() {
     
-    it('should ask for a stop number', function(done) {
+    it('should cancel when asked', function(done) {
         request(server)
             .post('/voice/betty')
-            .send(generate.getIntentRequest({ name: 'NextBus' }))
+            .send(generate.getIntentRequest({ name: 'Cancel' }))
             .set('SignatureCertChainUrl', LOCAL_CERT)
             .set('Signature', SIGNATURE)
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'What bus stop are you asking about?');
-                assert.equal(res.body.response.shouldEndSession, false);
+                assert.equal(res.body.response.outputSpeech.text, 'bye bye');
+                assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);
     });
-    
-    
 });
-

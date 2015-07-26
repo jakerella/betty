@@ -17,10 +17,6 @@
         {
           "name": "StopId",
           "type": "NUMBER"
-        },
-        {
-          "name": "Stop",
-          "type": "LITERAL"
         }
       ]
     },

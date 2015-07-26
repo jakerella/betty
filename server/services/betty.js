@@ -1,10 +1,21 @@
 'use strict';
 
 var debug = require('debug')('betty:service'),
+    debugSave = require('debug')('betty:service:save'),
     debugBus = require('debug')('betty:service:bus'),
     debugSetup = require('debug')('betty:service:setup');
 
-module.exports = function() {
+var stops = {};
+
+var LOCATION_NOT_SUPPORTED = 'I\'m sorry, but I don\'t have any information for your location!';
+
+module.exports = function(injection) {
+    
+    if (injection && injection.stops) {
+        stops = injection.stops;
+    }
+    
+    // ------------- Helper Methods -------------- //
     
     function getTransitKey(location) {
         var apiKey;
@@ -19,21 +30,25 @@ module.exports = function() {
         return apiKey;
     }
     
-    function getLocationNotSupported() {
-        return {
-            response: {
-                outputSpeech: {
-                    type: 'PlainText',
-                    text: 'I\'m sorry, but I don\'t have any information for your location!'
-                },
-                shouldEndSession: true
-            }
-        };
+    
+    function doSendMessage(msg, cb, endSession) {
+        endSession = !!endSession;
+        
+        return process.nextTick(function() {
+            cb(null, {
+                response: {
+                    outputSpeech: {
+                        type: 'PlainText',
+                        text: msg
+                    },
+                    shouldEndSession: endSession
+                }
+            });
+        });
     }
     
-    function getSetupInstructions() {
-        
-    }
+    
+    // ------------- Intent Handlers -------------- //
     
     function doLaunch(data, cb) {
         process.nextTick(function() {
@@ -86,96 +101,69 @@ module.exports = function() {
             slots = data.request.intent.slots || {},
             apiKey = getTransitKey();
         
-        debugSetup('Save request:', data);
+        debugSave('Save request:', data);
         
         if (!apiKey) {
-            return process.nextTick(function() {
-                cb(null, getLocationNotSupported());
-            });
+            return doSendMessage(LOCATION_NOT_SUPPORTED, cb);
         }
         
         // We must have a Name and either a StopId or Stop (name?)
-        if (((!slots.StopId || !slots.StopId.value) &&
-             (!slots.Stop || !slots.Stop.value)) ||
+        if (!slots.StopId || !slots.StopId.value ||
             !slots.Name || !slots.Name.value) {
-            return process.nextTick(function() {
-                debug('No stop specified to save, asking about that...');
-                cb(null, {
-                    response: {
-                        outputSpeech: {
-                            type: 'PlainText',
-                            text: 'Please tell me the stop ID used by your transit system and the name you would like me to use for it.'
-                        },
-                        shouldEndSession: false
-                    }
-                });
-            });
+            
+            debugSave('No stop specified to save, asking about that...');
+            return doSendMessage(
+                'Please tell me the stop ID used by your transit system and the name you would like me to use for it.',
+                cb
+            );
+            
         }
         
-        stopId = Number(slots.StopId.value) || slots.Stop.value;
+        stopId = Number(slots.StopId.value);
         
         if (!stopId) {
-            return process.nextTick(function() {
-                debug('Invalid StopId', slots.StopId.value, slots.Stop.value);
-                cb(null, {
-                    response: {
-                        outputSpeech: {
-                            type: 'PlainText',
-                            text: 'Sorry, but I didn\'t understand that stop. Can you try again?'
-                        },
-                        shouldEndSession: false
-                    }
-                });
-            });
+            debugSave('Invalid StopId value', slots.StopId.value);
+            return doSendMessage('Sorry, but currently the bus stop must be a numeric ID.', cb);
         }
         
-        debugSetup('Saving stop:', JSON.stringify(slots));
+        debugSave('Saving stop:', JSON.stringify(slots));
         
-        return process.nextTick(function() {
-            cb(null, {
-                response: {
-                    outputSpeech: {
-                        type: 'PlainText',
-                        text: 'Okay, I saved stop ' + stopId +  ' as ' + slots.Name.value + ' for you.'
-                    },
-                    shouldEndSession: true
-                }
-            });
-        });
+        stops[slots.Name.value] = stopId;
         
+        doSendMessage('Okay, I saved stop ' + stopId +  ' as ' + slots.Name.value + ' for you.', cb, true);
     }
     
     function getNextBus(data, cb) {
-        var slots = data.request.slots || {},
+        var busNumber = null,
+            slots = data.request.intent.slots || {},
             apiKey = getTransitKey();
         
         debugBus('Bus request:', data.request);
         
         if (!apiKey) {
-            return process.nextTick(function() {
-                cb(null, getLocationNotSupported());
-            });
+            return doSendMessage(LOCATION_NOT_SUPPORTED, cb);
+        }
+        
+        if (!slots.Stop || !slots.Stop.value) {
+            debugBus('No bus stop specified, asking about that...');
+            return doSendMessage('What bus stop are you asking about?', cb);
+        }
+        
+        if (!stops[slots.Stop.value]) {
+            debugBus('Bus stop not saved');
+            return doSendMessage('Sorry, but I don\'t know about that bus stop, have you saved it yet?', cb, true);
         }
         
         
-        if (!slots.Stop) {
-            return process.nextTick(function() {
-                debug('No bus stop specified, asking about that...');
-                cb(null, {
-                    response: {
-                        outputSpeech: {
-                            type: 'PlainText',
-                            text: 'What bus stop are you asking about?'
-                        },
-                        shouldEndSession: false
-                    }
-                });
-            });
-        }
+        busNumber = slots.Number && (Number(slots.Number.value) || slots.Number.value);
         
+        debugBus('Looking for next bus', slots.Stop.value, slots[slots.Stop.value], busNumber);
         
+        doSendMessage('The next 62 bus is in 5 minutes', cb, true);
     }
     
+    
+    // ------------- API Definition -------------- //
     
     return {
         handleLaunchRequest: doLaunch,
