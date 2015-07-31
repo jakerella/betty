@@ -3,6 +3,7 @@
 var debug = require('debug')('betty:app'),
     express = require('express'),
     bodyParser = require('body-parser'),
+    mongoose = require('mongoose'),
     staticRoutes = require('./routes/static'),
     voiceRoutes = require('./routes/voice');
 
@@ -18,7 +19,6 @@ server.use(bodyParser.json({
         req.rawBody = buf.toString();
     }
 }));
-
 
 debug('Setting up app routes');
 
@@ -36,7 +36,56 @@ server.use(function(req, res, next) {
 server.use(require('./helpers/errorHandler')());
 
 
+// ------------------- Shutdown cleanup ------------------ //
+
+function cleanup() {
+    debug('Performing app cleanup');
+    mongoose.disconnect(function(err) {
+        if (err) {
+            console.error('Unable to close connection to Mongo:', err.message);
+            console.error(err.stack);
+        }
+    });
+}
+
+process.on('uncaughtException', function(err) {
+    console.error('Uncaught exception:', err.message);
+    console.error(err.stack);
+    cleanup();
+});
+process.on('exit', function(code) {
+    if (code !== 0) {
+        console.error('Closing connection with code:', code);
+    }
+    cleanup();
+});
+process.on('SIGINT', function() {
+    console.log('Exiting application from SIGINT');
+    cleanup();
+});
+process.on('SIGTERM', function() {
+    console.log('Exiting application from SIGTERM');
+    cleanup();
+});
+
+
+
 // ------------------- Main Server Startup ------------------ //
+
+// Connect to mongo
+if ( !process.env.BETTY_DB_URL ) {
+    throw new Error('No MongoDB connection URL was provided.');
+}
+debug('Mongo connection URL', process.env.BETTY_DB_URL);
+mongoose.connect(process.env.BETTY_DB_URL, {
+    server: { keepAlive: 1 }
+}, function(err) {
+    if (err) {
+        console.error('Unable to open connection to Mongo.');
+        throw err;
+    }
+});
+
 
 if (require.main === module) {
     debug('Starting express application...');

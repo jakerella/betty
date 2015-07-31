@@ -2,10 +2,12 @@
 var assert = require('assert'),
     request = require('supertest'),
     server = require('../server/app.js'),
+    User = require('../server/models/user.js'),
     generate = require('./data/generate.js')('amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-0000000betty');
 
 var LOCAL_CERT = 'file:///home/jordan/projects/betty/test/data/echo-api.pem',
-    SIGNATURE = 'foobar';
+    SIGNATURE = 'foobar',
+    TEST_USER_ID = 'amzn1.account.AM3B00000000000000000000013';
 
 function assertEchoResponseFormat(data) {
     assert.equal(data.version, '1.0');
@@ -16,6 +18,11 @@ function assertEchoResponseFormat(data) {
 }
 
 describe('NextBus intent', function() {
+    
+    afterEach(function(done) {
+        // Kill any test records created during testing
+        User.remove(done);
+    });
     
     it('should ask for a stop if not given', function(done) {
         request(server)
@@ -78,21 +85,33 @@ describe('NextBus intent', function() {
     });
 
     it('should succeed with a stop name and bus number', function(done) {
-        request(server)
-            .post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({
-                name: 'NextBus',
-                slots: { 'Stop': 'foobar', 'Number': '62' }
-            }))
-            .expect('Content-Type', /json/)
-            .expect(function(res) {
-                assertEchoResponseFormat(res.body);
-                assert(/The next 62 bus is in \d+ minutes?/.test(res.body.response.outputSpeech.text));
-                assert.equal(res.body.response.shouldEndSession, true);
+        
+        User.findOrCreate(TEST_USER_ID)
+            .then(function(user) {
+                user.stops.push({
+                    name: 'foobar',
+                    id: 123
+                });
+                return user.save();
             })
-            .expect(200, done);
+            .then(function() {
+                request(server)
+                    .post('/voice/betty')
+                    .set('SignatureCertChainUrl', LOCAL_CERT)
+                    .set('Signature', SIGNATURE)
+                    .send(generate.getIntentRequest({
+                        name: 'NextBus',
+                        slots: { 'Stop': 'foobar', 'Number': '62' }
+                    }))
+                    .expect('Content-Type', /json/)
+                    .expect(function(res) {
+                        assertEchoResponseFormat(res.body);
+                        assert(/The next 62 bus is in \d+ minutes?/.test(res.body.response.outputSpeech.text));
+                        assert.equal(res.body.response.shouldEndSession, true);
+                    })
+                    .expect(200, done);
+            })
+            .then(null, done);
     });
     
 });

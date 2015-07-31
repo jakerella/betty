@@ -2,6 +2,7 @@
 var assert = require('assert'),
     request = require('supertest'),
     server = require('../server/app.js'),
+    User = require('../server/models/user.js'),
     generate = require('./data/generate.js')('amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-0000000betty');
 
 var LOCAL_CERT = 'file:///home/jordan/projects/betty/test/data/echo-api.pem',
@@ -16,6 +17,11 @@ function assertEchoResponseFormat(data) {
 }
 
 describe('SaveStop intent', function() {
+    
+    afterEach(function(done) {
+        // Kill any test records created during testing
+        User.remove(done);
+    });
     
     it('should ask for a stop id and name if not given', function(done) {
         request(server)
