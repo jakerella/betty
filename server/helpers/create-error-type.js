@@ -5,27 +5,11 @@
  * file and line number where the error object was generated.
  * 
  * To use:
- function CustomError() {
-    return require('./create-error-type').call(this, arguments);
- }
+    function CustomError() { require('./create-error-type').apply(this, [].slice.call(arguments)); }
+    require('util').inherits(CustomError, Error);
  */
-
-module.exports = function createErrorType(args) {
-    var err = Error.call(this, args[0]);
-    
-    if (!err.lineNumber) {
-        var lineGetter = new Error(),
-            pieces = lineGetter.stack
-                .split(/\n/)[3]
-                .match(/\s*at (?:([^\(]+) \()?([^\:]+)\:(\d+)\:(\d+)/);
-        
-        if (pieces) {
-            err.method = pieces[1];
-            err.file = pieces[2];
-            err.lineNumber = pieces[3];
-            err.colNumber = pieces[4];
-        }
-    }
-    
-    return err;
+module.exports = function customErrorConstructor(msg, status) {
+    Error.captureStackTrace(this, this);
+    this.message = msg || this.constructor.name || 'Application Error';
+    this.status = status || 500;
 };

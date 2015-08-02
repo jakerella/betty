@@ -3,28 +3,14 @@
 var debug = require('debug')('betty:service'),
     debugSave = require('debug')('betty:service:save'),
     debugBus = require('debug')('betty:service:bus'),
-    debugSetup = require('debug')('betty:service:setup'),
     User = require('../models/user.js');
 
-var LOCATION_NOT_SUPPORTED = 'I\'m sorry, but I don\'t have any information for your location!';
+function ServiceError() { require('../helpers/create-error-type').apply(this, [].slice.call(arguments)); }
+require('util').inherits(ServiceError, Error);
 
 module.exports = function() {
     
     // ------------- Helper Methods -------------- //
-    
-    function getTransitKey(location) {
-        var apiKey;
-        
-        location = location || 'WAS';
-        apiKey = process.env['TRANSIT_KEY_' + location];
-        
-        if (!apiKey) {
-            debugSetup('No api key found for transit in user\'s location.');
-        }
-        
-        return apiKey;
-    }
-    
     
     function doSendMessage(msg, cb, endSession) {
         endSession = !!endSession;
@@ -93,18 +79,12 @@ module.exports = function() {
     
     function doSaveStop(data, cb) {
         var stopId, stopName,
-            slots = data.request.intent.slots || {},
-            apiKey = getTransitKey();
+            slots = data.request.intent.slots || {};
         
         debugSave('Save request:', data);
         
         User.findOrCreate(data.session.user.userId)
             .then(function(user) {
-                
-                apiKey = getTransitKey(user.location);
-                if (!apiKey) {
-                    return doSendMessage(LOCATION_NOT_SUPPORTED, cb);
-                }
                 
                 // We must have a Name and either a StopId or Stop (name?)
                 if (!slots.StopId || !slots.StopId.value ||
@@ -146,49 +126,61 @@ module.exports = function() {
     }
     
     function getNextBus(data, cb) {
-        var stopId, busNumber,
+        var transitApi, stopId,
             slots = data.request.intent.slots || {},
-            apiKey;
+            busNumber = slots.Number && (Number(slots.Number.value) || slots.Number.value);
         
         debugBus('Bus request:', data.request);
         
         User.findOrCreate(data.session.user.userId)
-            .then(
-                function(user) {
+            .then(function(user) {
                     
-                    apiKey = getTransitKey(user.location);
-                    if (!apiKey) {
-                        return doSendMessage(LOCATION_NOT_SUPPORTED, cb);
-                    }
-                    
-                    if (!slots.Stop || !slots.Stop.value) {
-                        debugBus('No bus stop specified, asking about that...');
-                        return doSendMessage('What bus stop are you asking about?', cb);
-                    }
-                    
-                    stopId = user.getSavedStopId(slots.Stop.value);
-                    if (!stopId) {
-                        debugBus('Bus stop not saved');
-                        return doSendMessage('Sorry, but I don\'t know about that bus stop, have you saved it yet?', cb, true);
-                    }
-                    
-                    busNumber = slots.Number && (Number(slots.Number.value) || slots.Number.value);
-                    
-                    debugBus('Looking for next bus', slots.Stop.value, slots[slots.Stop.value], busNumber);
-                    
-                    
-                    // TODO: do the actual lookup
-                    
-                    
-                    doSendMessage('The next 62 bus is in 5 minutes', cb, true);
-                    
-                },
-                function(err) {
-                    debugBus(err.message);
-                    console.error(err.stack);
-                    doSendMessage('Sorry, but there was a problem. Can you try again?', cb, true);
+                transitApi = require('../helpers/transit-' + user.location.toLowerCase())();
+                if (!transitApi) {
+                    throw new ServiceError('I\'m sorry, but I don\'t have any information for your location!', 400);
+                } else if (!transitApi.getNextBus) {
+                    throw new ServiceError('I\'m sorry, but I don\'t have bus information for your location!', 400);
                 }
-            );
+                
+                if (!slots.Stop || !slots.Stop.value) {
+                    debugBus('No bus stop specified, asking about that...');
+                    throw new ServiceError('What bus stop are you asking about?', 200);
+                }
+                
+                stopId = user.getSavedStopId(slots.Stop.value);
+                if (!stopId) {
+                    debugBus('Bus stop not saved');
+                    throw new ServiceError('Sorry, but I don\'t know about that bus stop, have you saved it yet?', 400);
+                }
+                
+                debugBus('Looking for next bus', slots.Stop.value, slots[slots.Stop.value], busNumber);
+                
+                return transitApi.getNextBus(stopId, busNumber);
+                
+            })
+            .then(function(data) {
+                
+                if (data.noData) {
+                    if (busNumber) {
+                        return doSendMessage('Sorry, but there are no ' + busNumber + ' buses scheduled to arrive soon.', cb, true);
+                    } else {
+                        return doSendMessage('Sorry, but there are no buses scheduled to arrive soon.', cb, true);
+                    }
+                }
+                
+                doSendMessage('The next ' + data.busNumber + ' bus will arrive in ' + data.time + '.', cb, true);
+                
+            })
+            .then(null, function(err) {
+                var msg = err.message;
+                
+                if (!(err instanceof ServiceError)) {
+                    msg = 'Sorry, but there was a problem. Can you try again?';
+                }
+                
+                debugBus(err);
+                doSendMessage(msg, cb, err.status > 299);
+            });
     }
     
     

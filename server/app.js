@@ -5,7 +5,8 @@ var debug = require('debug')('betty:app'),
     bodyParser = require('body-parser'),
     mongoose = require('mongoose'),
     staticRoutes = require('./routes/static'),
-    voiceRoutes = require('./routes/voice');
+    voiceRoutes = require('./routes/voice'),
+    errorHandler = require('./routes/errorHandler')();
 
 
 // ---------------- Primary Server Config --------------- //
@@ -26,14 +27,14 @@ server.use('/', staticRoutes);
 server.use('/voice', voiceRoutes);
 
 
-debug('Setting up error handling');
+// ---------------- Error Handling ----------------- //
 
 server.use(function(req, res, next) {
     var err = new Error('Sorry, but that is not a valid command');
     err.status = 404;
     return next(err);
 });
-server.use(require('./helpers/errorHandler')());
+server.use(errorHandler);
 
 
 // ------------------- Shutdown cleanup ------------------ //

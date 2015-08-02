@@ -1,13 +1,17 @@
 
 var assert = require('assert'),
     request = require('supertest'),
+    nock = require('nock'),
     server = require('../server/app.js'),
     User = require('../server/models/user.js'),
     generate = require('./data/generate.js')('amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-0000000betty');
 
 var LOCAL_CERT = 'file:///home/jordan/projects/betty/test/data/echo-api.pem',
-    SIGNATURE = 'foobar',
-    TEST_USER_ID = 'amzn1.account.AM3B00000000000000000000013';
+    SIGNATURE = 'this is a test signature',
+    TEST_USER_ID = 'amzn1.account.AM3B00000000000000000000013',
+    TEST_STOP_NAME = 'foobar',
+    TEST_STOP_ID = 1002744,
+    TEST_BUS_NUMBER = 62;
 
 function assertEchoResponseFormat(data) {
     assert.equal(data.version, '1.0');
@@ -46,7 +50,7 @@ describe('NextBus intent', function() {
             .set('Signature', SIGNATURE)
             .send(generate.getIntentRequest({
                 name: 'NextBus',
-                slots: { 'Stop': 'foobar' }
+                slots: { 'Stop': TEST_STOP_NAME }
             }))
             .expect('Content-Type', /json/)
             .expect(function(res) {
@@ -58,39 +62,16 @@ describe('NextBus intent', function() {
     });
     
     it('should succeed with just a stop name', function(done) {
-        var agent = request(server);
         
-        agent.post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({
-                name: 'SaveStop',
-                slots: { 'StopId': 123, 'Name': 'foobar' }
-            }))
-            .end(function() {
-                agent.post('/voice/betty')
-                    .set('SignatureCertChainUrl', LOCAL_CERT)
-                    .set('Signature', SIGNATURE)
-                    .send(generate.getIntentRequest({
-                        name: 'NextBus',
-                        slots: { 'Stop': 'foobar' }
-                    }))
-                    .expect(function(res) {
-                        assertEchoResponseFormat(res.body);
-                        assert.equal(res.body.response.outputSpeech.text, 'The next 62 bus is in 5 minutes');
-                        assert.equal(res.body.response.shouldEndSession, true);
-                    })
-                    .expect(200, done);
-            });
-    });
-
-    it('should succeed with a stop name and bus number', function(done) {
+        nock('https://api.wmata.com')
+            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
+            .reply(200, require('./data/wmata.nextbus.json'));
         
         User.findOrCreate(TEST_USER_ID)
             .then(function(user) {
                 user.stops.push({
-                    name: 'foobar',
-                    id: 123
+                    name: TEST_STOP_NAME,
+                    id: TEST_STOP_ID
                 });
                 return user.save();
             })
@@ -101,12 +82,80 @@ describe('NextBus intent', function() {
                     .set('Signature', SIGNATURE)
                     .send(generate.getIntentRequest({
                         name: 'NextBus',
-                        slots: { 'Stop': 'foobar', 'Number': '62' }
+                        slots: { 'Stop': TEST_STOP_NAME }
                     }))
                     .expect('Content-Type', /json/)
                     .expect(function(res) {
                         assertEchoResponseFormat(res.body);
-                        assert(/The next 62 bus is in \d+ minutes?/.test(res.body.response.outputSpeech.text));
+                        assert.equal(res.body.response.outputSpeech.text, 'The next 62 bus will arrive in 5 minutes.');
+                        assert.equal(res.body.response.shouldEndSession, true);
+                    })
+                    .expect(200, done);
+            })
+            .then(null, done);
+    });
+
+    it('should succeed with a stop name and bus number', function(done) {
+        
+        nock('https://api.wmata.com')
+            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
+            .reply(200, require('./data/wmata.nextbus.json'));
+        
+        User.findOrCreate(TEST_USER_ID)
+            .then(function(user) {
+                user.stops.push({
+                    name: TEST_STOP_NAME,
+                    id: TEST_STOP_ID
+                });
+                return user.save();
+            })
+            .then(function() {
+                request(server)
+                    .post('/voice/betty')
+                    .set('SignatureCertChainUrl', LOCAL_CERT)
+                    .set('Signature', SIGNATURE)
+                    .send(generate.getIntentRequest({
+                        name: 'NextBus',
+                        slots: { 'Stop': TEST_STOP_NAME, 'Number': 63 }
+                    }))
+                    .expect('Content-Type', /json/)
+                    .expect(function(res) {
+                        assertEchoResponseFormat(res.body);
+                        assert.equal(res.body.response.outputSpeech.text, 'The next 63 bus will arrive in 13 minutes.');
+                        assert.equal(res.body.response.shouldEndSession, true);
+                    })
+                    .expect(200, done);
+            })
+            .then(null, done);
+    });
+
+    it('should find no data with bad bus number', function(done) {
+        
+        nock('https://api.wmata.com')
+            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
+            .reply(200, require('./data/wmata.nextbus.json'));
+        
+        User.findOrCreate(TEST_USER_ID)
+            .then(function(user) {
+                user.stops.push({
+                    name: TEST_STOP_NAME,
+                    id: TEST_STOP_ID
+                });
+                return user.save();
+            })
+            .then(function() {
+                request(server)
+                    .post('/voice/betty')
+                    .set('SignatureCertChainUrl', LOCAL_CERT)
+                    .set('Signature', SIGNATURE)
+                    .send(generate.getIntentRequest({
+                        name: 'NextBus',
+                        slots: { 'Stop': TEST_STOP_NAME, 'Number': 99 }
+                    }))
+                    .expect('Content-Type', /json/)
+                    .expect(function(res) {
+                        assertEchoResponseFormat(res.body);
+                        assert.equal(res.body.response.outputSpeech.text, 'Sorry, but there are no 99 buses scheduled to arrive soon.');
                         assert.equal(res.body.response.shouldEndSession, true);
                     })
                     .expect(200, done);

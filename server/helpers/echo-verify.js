@@ -16,9 +16,8 @@ var readFile = Promise.promisify(fs.readFile),
     getPublicKey = Promise.promisify(pem.getPublicKey);
 
 
-function VerifyError() {
-    return require('./create-error-type').call(this, arguments);
-}
+function VerifyError() { require('./create-error-type').apply(this, [].slice.call(arguments)); }
+require('util').inherits(VerifyError, Error);
 
 
 function convertToGMT(d) {

@@ -1,0 +1,37 @@
+{
+    "StopName":"5th St + Rittenhouse St",
+    "Predictions":[
+        {
+            "RouteID":"62",
+            "DirectionText":"South to Georgia Ave/Petworth",
+            "DirectionNum":"1",
+            "Minutes":5,
+            "VehicleID":"6518",
+            "TripID":"7358278"
+        },
+        {
+            "RouteID":"63",
+            "DirectionText":"South to Federal Triangle",
+            "DirectionNum":"1",
+            "Minutes":13,
+            "VehicleID":"3009",
+            "TripID":"7358815"
+        },
+        {
+            "RouteID":"62",
+            "DirectionText":"South to Georgia Ave/Petworth",
+            "DirectionNum":"1",
+            "Minutes":27,
+            "VehicleID":"4568",
+            "TripID":"7358359"
+        },
+        {
+            "RouteID":"63",
+            "DirectionText":"South to Federal Triangle",
+            "DirectionNum":"1",
+            "Minutes":32,
+            "VehicleID":"3045",
+            "TripID":"7358817"
+        }
+    ]
+}
