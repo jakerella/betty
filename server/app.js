@@ -52,19 +52,22 @@ process.on('uncaughtException', function(err) {
     console.error('Uncaught exception:', err.message);
     console.error(err.stack);
     cleanup();
+    process.exit(err.code || 3);
+});
+process.on('SIGINT', function() {
+    console.log('Exiting application from SIGINT', arguments);
+    cleanup();
+    process.exit(1);
+});
+process.on('SIGTERM', function() {
+    console.log('Exiting application from SIGTERM', arguments);
+    cleanup();
+    process.exit(1);
 });
 process.on('exit', function(code) {
     if (code !== 0) {
         console.error('Closing connection with code:', code);
     }
-    cleanup();
-});
-process.on('SIGINT', function() {
-    console.log('Exiting application from SIGINT');
-    cleanup();
-});
-process.on('SIGTERM', function() {
-    console.log('Exiting application from SIGTERM');
     cleanup();
 });
 
