@@ -1,35 +1,21 @@
 {
   "intents": [
     {
-      "intent": "Cancel",
-      "slots": [{
-        "name": "Phrase",
-        "type": "LITERAL"
-      }]
+      "intent": "AMAZON.StopIntent"
     },
     {
-      "intent": "SaveStop",
-      "slots": [
-        {
-          "name": "Name",
-          "type": "LITERAL"
-        },
-        {
-          "name": "StopId",
-          "type": "NUMBER"
-        }
-      ]
+      "intent": "AMAZON.CancelIntent"
     },
     {
       "intent": "NextBus",
       "slots": [
         {
           "name": "Stop",
-          "type": "LITERAL"
+          "type": "BUS_STOP"
         },
         {
           "name": "Number",
-          "type": "LITERAL"
+          "type": "BUS_NUMBER"
         }
       ]
     }

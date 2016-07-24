@@ -1,0 +1,7 @@
+{
+    "stops": {
+        "north": 1002716,
+        "south": 1002744,
+        "default": "north"
+    }
+}

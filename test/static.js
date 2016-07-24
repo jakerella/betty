@@ -1,3 +1,4 @@
+'use strict';
 
 var assert = require('assert'),
     request = require('supertest'),
@@ -11,7 +12,7 @@ describe('GET root', function(){
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assert.equal(res.body.name, 'betty');
-                assert.equal(res.body.purpose, 'Deliver public transit information via Amazon Echo');
+                assert.equal(res.body.purpose, 'Do my bidding via Amazon Echo (Alexa)');
                 assert.ok(/^[0-9\.]+\s(seconds|minutes|hours)$/.test(res.body.uptime));
             })
             .expect(200, done);
