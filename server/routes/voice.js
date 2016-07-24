@@ -1,13 +1,11 @@
 'use strict';
 
-var debug = require('debug')('betty:routes:voice'),
-    express = require('express'),
-    Promise = require('bluebird'),
-    router = express.Router(),
+let debug = require('debug')('betty:routes:voice'),
+    router = require('express').Router(),
     echoVerify = require('../helpers/echo-verify'),
     betty = require('../services/betty');
 
-var VERSION = '2.0',
+const VERSION = '2.0',
     DEFAULT_RESPONSE = {
         outputSpeech: {
             type: 'PlainText',
@@ -20,7 +18,7 @@ var VERSION = '2.0',
  * Echo request verification middleware
  */
 router.use(function(req, res, next) {
-    var err = new Error('Malformed request signature detected. Request logged.');
+    let err = new Error('Malformed request signature detected. Request logged.');
     err.status = 400;
 
     echoVerify(req.headers, req.rawBody, function(e) {
@@ -58,8 +56,6 @@ router.post('/betty', function(req, res, next) {
 
 function fireProperHandler(body, mod) {
     return new Promise(function (resolve, reject) {
-        var err;
-
         if (body.request.type === 'IntentRequest' &&
             typeof(mod['handle' + body.request.intent.name]) === 'function') {
 
@@ -78,7 +74,7 @@ function fireProperHandler(body, mod) {
             });
 
         } else {
-            err = new Error('Sorry, but that request type is not implemented');
+            let err = new Error('Sorry, but that request type is not implemented');
             err.status = 501;
             reject(err);
         }

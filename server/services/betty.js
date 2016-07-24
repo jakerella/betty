@@ -81,14 +81,13 @@ function handleNextBus(data, cb) {
 
         })
         .catch(function(err) {
-            var msg = err.message;
-
             if (!(err instanceof Error)) {
-                msg = 'Sorry, but there was a problem. Can you try again?';
+                err = new Error(err || 'Sorry, but there was a problem. Can you try again?');
+                err.status = 500;
             }
 
             debugBus(err);
-            doSendMessage(msg, cb, err.status > 399);
+            doSendMessage(err.message, cb, err.status > 399);
         });
 }
 

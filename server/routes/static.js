@@ -2,8 +2,7 @@
 
 var debug = require('debug')('betty:routes:static'),
     path = require('path'),
-    express = require('express'),
-    router = express.Router();
+    router = require('express').Router();
 
 function getUptime() {
     var now = (new Date()).getTime(),

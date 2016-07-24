@@ -5,9 +5,9 @@ var debug = require('debug')('echo:verify'),
     path = require('path'),
     url = require('url'),
     https = (process.env.NODE_ENV === 'development') ? require('http') : require('https'),
-    Promise = require('bluebird'),
     pem = require('pem'),
-    crypto = require('crypto');
+    crypto = require('crypto'),
+    bluebird = require('bluebird');
 
 var MAX_REQUEST_AGE = (process.env.NODE_ENV === 'development') ? (99999999) : (150 * 1000);
 
@@ -23,9 +23,9 @@ module.exports = function validateRequest(headers, rawBody, cb) {
 
 // --------------- Internal Workings --------------- //
 
-var readFile = Promise.promisify(fs.readFile),
-    readCertInfo = Promise.promisify(pem.readCertificateInfo),
-    getPublicKey = Promise.promisify(pem.getPublicKey);
+var readFile = bluebird.promisify(fs.readFile),
+    readCertInfo = bluebird.promisify(pem.readCertificateInfo),
+    getPublicKey = bluebird.promisify(pem.getPublicKey);
 
 
 function convertToGMT(d) {

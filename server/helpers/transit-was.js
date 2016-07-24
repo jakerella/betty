@@ -1,7 +1,6 @@
 'use strict';
 
 var debug = require('debug')('betty:transit:was'),
-    Promise = require('bluebird'),
     request = require('request');
 
 var API_KEY = process.env.TRANSIT_KEY_WAS,
