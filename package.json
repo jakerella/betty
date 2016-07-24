@@ -1,7 +1,7 @@
 {
   "name": "betty",
   "version": "0.1.0",
-  "description": "An Amazon Echo app to get public transit information.",
+  "description": "Do my bidding via Amazon Echo (Alexa).",
   "main": "server/app.js",
   "private": true,
   "dependencies": {
@@ -9,8 +9,6 @@
     "body-parser": "^1.13.1",
     "debug": "^2.2.0",
     "express": "^4.12.4",
-    "mongodb": "^2.0.39",
-    "mongoose": "^4.1.0",
     "pem": "^1.7.2",
     "request": "^2.60.0"
   },
@@ -26,14 +24,14 @@
   },
   "author": "Jordan Kasper",
   "license": "MIT",
-  "homepage": "https://jordankasper.com:8989",
+  "homepage": "https://github.com/jakerella/betty",
   "scripts": {
     "start": "node server/app.js",
-    "pretest": "./node_modules/jshint/bin/jshint .",
-    "test": "./node_modules/mocha/bin/mocha test/",
-    "devtest": "./node_modules/mocha/bin/mocha --watch test/"
+    "pretest": "jshint server/",
+    "test": "mocha test/",
+    "devtest": "mocha --watch test/"
   },
   "engines": {
-    "node": "0.12.4"
+    "node": "6.2.1"
   }
 }
