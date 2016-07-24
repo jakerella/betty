@@ -11,11 +11,11 @@
       "slots": [
         {
           "name": "Stop",
-          "type": "LITERAL"
+          "type": "BUS_STOP"
         },
         {
           "name": "Number",
-          "type": "LITERAL"
+          "type": "BUS_NUMBER"
         }
       ]
     }

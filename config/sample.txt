@@ -1,66 +1,42 @@
 
+NextBus  next bus
+NextBus  next bus {Stop}
+NextBus  about the next bus
 NextBus  when is the next bus
 NextBus  when's the next bus
+NextBus  when is the next bus {Stop}
+NextBus  when's the next bus {Stop}
 NextBus  how long until the next bus
 NextBus  how long til the next bus
-NextBus  when is the next {sixty two|Number} bus
-NextBus  when's the next {sixty two|Number} bus
-NextBus  when's the next number {sixty two|Number} bus
-NextBus  how long until the next {sixty two|Number} bus
-NextBus  how long until the next number {sixty two|Number} bus
-NextBus  when is the next {seventy|Number} bus
-NextBus  when is the next number {sixty two|Number} bus
-NextBus  when is the next number {seventy|Number} bus
+NextBus  how long until the next bus {Stop}
+NextBus  how long til the next bus {Stop}
+NextBus  when is the next {Number} bus
+NextBus  when's the next {Number} bus
+NextBus  when's the next number {Number} bus
+NextBus  how long until the next {Number} bus
+NextBus  how long until the next number {Number} bus
+NextBus  when is the next {Number} bus
+NextBus  when is the next number {Number} bus
+NextBus  when is the next number {Number} bus
 NextBus  when the next bus is arriving
 NextBus  when will the next bus arrive
 NextBus  how long until the next bus arrives
 NextBus  how long til the next bus arrives
-NextBus  when is the next number {sixty two|Number} bus arriving
-NextBus  when's the next number {sixty two|Number} bus arriving
-NextBus  when is the next {seventy|Number} bus arriving
-NextBus  when is the next {number seventy|Number} bus arriving
+NextBus  when is the next number {Number} bus arriving
+NextBus  when's the next number {Number} bus arriving
+NextBus  when is the next {Number} bus arriving
+NextBus  when is the next {Number} bus arriving
 NextBus  tell me when the next bus arrives
 NextBus  tell me when the next bus is arriving
-NextBus  when is the next bus at {rittenhouse|Stop}
-NextBus  when is the next bus at {work stop|Stop}
-NextBus  when is the next bus arriving at {rittenhouse|Stop}
-NextBus  when is the next bus arriving at {work stop|Stop}
-NextBus  when is the next bus arriving to {rittenhouse|Stop}
-NextBus  when is the next bus arriving to {work stop|Stop}
-NextBus  when's the next bus at {work stop|Stop}
-NextBus  when is the next bus at {fifth street and rittenhouse place|Stop}
-NextBus  when the next bus will arrive at {rittenhouse|Stop}
-NextBus  when the next bus will arrive to {rittenhouse|Stop}
-NextBus  when will the next bus arrive at {rittenhouse|Stop}
-NextBus  when will the next bus arrive to {rittenhouse|Stop}
-NextBus  when the next bus will arrive at {work stop|Stop}
-NextBus  when the next bus will arrive to {work stop|Stop}
-NextBus  when will the next bus arrive at {work stop|Stop}
-NextBus  when will the next bus arrive to {work stop|Stop}
-NextBus  when the next bus will arrive at {fifth street and rittenhouse|Stop}
-NextBus  when the next bus will arrive at {work stop place|Stop}
-NextBus  when is the next {sixty two|Number} bus at {rittenhouse|Stop}
-NextBus  when's the next {sixty two|Number} bus at {rittenhouse|Stop}
-NextBus  when is the next {sixty two|Number} bus at {work stop|Stop}
-NextBus  when's the next {sixty two|Number} bus at {work stop|Stop}
-NextBus  when is the next {seventy|Number} bus at {work stop|Stop}
-NextBus  when is the next number {sixty two|Number} bus at {work stop|Stop}
-NextBus  when is the next number {seventy|Number} bus at {work stop|Stop}
-NextBus  when is the next {sixty two|Number} bus at {fifth street and rittenhouse place|Stop}
-NextBus  when is the next {seventy|Number} bus at {fifth street and rittenhouse place|Stop}
-NextBus  when is the next number {sixty two|Number} bus at {fifth street and rittenhouse place|Stop}
-NextBus  when is the next number {seventy|Number} bus at {fifth street and rittenhouse place|Stop}
-NextBus  when's the next number {seventy|Number} bus at {fifth street and rittenhouse place|Stop}
-NextBus  when is the next {sixty two|Number} bus at {fifth street and rittenhouse|Stop}
-NextBus  when is the next {seventy|Number} bus at {fifth street and rittenhouse|Stop}
-NextBus  when is the next number {sixty two|Number} bus at {rittenhouse|Stop}
-NextBus  when is the next number {sixty two|Number} bus at {fifth street and rittenhouse|Stop}
-NextBus  when is the next number {seventy|Number} bus at {fifth street and rittenhouse|Stop}
-NextBus  when is the next {sixty two|Number} bus at {work stop place|Stop}
-NextBus  when is the next {seventy|Number} bus at {work stop place|Stop}
-NextBus  when is the next number {sixty two|Number} bus at {work stop place|Stop}
-NextBus  when is the next number {seventy|Number} bus at {work stop place|Stop}
-NextBus  when is the next {sixty two|Number} bus at {takoma station|Stop}
-NextBus  when is the next {seventy|Number} bus at {takoma station|Stop}
-NextBus  when is the next number {sixty two|Number} bus at {takoma station|Stop}
-NextBus  when is the next number {seventy|Number} bus at {takoma station|Stop}
+NextBus  when is the next bus {Stop}
+NextBus  when's the next bus {Stop}
+NextBus  when will the next bus heading {Stop} arrive
+NextBus  when the next bus will arrive heading {Stop}
+NextBus  when will the next bus arrive heading {Stop}
+NextBus  when is the next {Number} bus heading {Stop}
+NextBus  when's the next {Number} bus heading {Stop}
+NextBus  when's the next {Number} bus heading {Stop}
+NextBus  when is the next number {Number} bus heading {Stop}
+NextBus  when is the next number {Number} bus heading {Stop}
+NextBus  when's the next number {Number} bus heading {Stop}
+NextBus  when is the next number {Number} bus heading {Stop}
