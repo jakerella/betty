@@ -52,19 +52,19 @@ function handleNextBus(data, cb) {
 
     debugBus('Bus request:', data.request);
 
-    if (!slots.Stop || !slots.Stop.value) {
-        debugBus('No bus stop specified, asking about that...');
-        return doSendMessage('What bus stop are you asking about?', cb, false);
+    if (slots.Stop && slots.Stop.value) {
+        stopId = appData.stops[slots.Stop.value];
+    } else {
+        debugBus('No bus stop specified, using default');
+        stopId = appData.stops[appData.stops.default];
     }
 
-    stopId = appData.stops[slots.Stop.value];
     if (!stopId) {
-        console.log(slots.Stop.value, appData.stops);
         debugBus('Bus stop not saved');
         return doSendMessage('Sorry, but I don\'t know about that bus stop, have you saved it yet?', cb, true);
     }
 
-    debugBus('Looking for next bus', slots.Stop.value, slots[slots.Stop.value], busNumber);
+    debugBus('Looking for next bus', stopId, busNumber);
 
     transitApi.getNextBus(stopId, busNumber)
         .then(function(transitData) {

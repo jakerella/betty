@@ -23,21 +23,6 @@ function assertEchoResponseFormat(data) {
 
 describe('NextBus intent', function() {
 
-    it('should ask for a stop if not given', function(done) {
-        request(server)
-            .post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({ name: 'NextBus' }))
-            .expect('Content-Type', /json/)
-            .expect(function(res) {
-                assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'What bus stop are you asking about?');
-                assert.equal(res.body.response.shouldEndSession, false);
-            })
-            .expect(200, done);
-    });
-
     it('should fail if the stop is not saved', function(done) {
         request(server)
             .post('/voice/betty')
@@ -51,6 +36,28 @@ describe('NextBus intent', function() {
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
                 assert.equal(res.body.response.outputSpeech.text, 'Sorry, but I don\'t know about that bus stop, have you saved it yet?');
+                assert.equal(res.body.response.shouldEndSession, true);
+            })
+            .expect(200, done);
+    });
+
+    it('should use default for a stop if not given', function(done) {
+
+        nock('https://api.wmata.com')
+            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
+            .reply(200, require('./data/wmata.nextbus.json'));
+
+        request(server)
+            .post('/voice/betty')
+            .set('SignatureCertChainUrl', LOCAL_CERT)
+            .set('Signature', SIGNATURE)
+            .send(generate.getIntentRequest({
+                name: 'NextBus'
+            }))
+            .expect('Content-Type', /json/)
+            .expect(function(res) {
+                assertEchoResponseFormat(res.body);
+                assert.equal(res.body.response.outputSpeech.text, 'The next 62 bus will arrive in 5 minutes.');
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);
