@@ -3,5 +3,12 @@
         "north": 1002716,
         "south": 1002744,
         "default": "north"
+    },
+    "location": {
+        "zip": 20011,
+        "city": "Washington",
+        "state": "DC",
+        "lat": 38.9649734,
+        "lng": -77.02072489999999
     }
 }

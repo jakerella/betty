@@ -2,13 +2,16 @@
 
 var debug = require('debug')('betty:service'),
     debugBus = require('debug')('betty:service:bus'),
+    debugWeather = require('debug')('betty:service:weather'),
     transitApi = require('../helpers/transit-was')(),
+    weatherApi = require('../helpers/weather')(),
     appData = require('../../config/data.json');
 
 module.exports = {
     handleLaunchRequest: handleLaunchRequest,
     handleSessionEndedRequest: handleSessionEndedRequest,
-    handleNextBus: handleNextBus
+    handleNextBus: handleNextBus,
+    handleWeather: handleWeather
 };
 
 
@@ -88,6 +91,28 @@ function handleNextBus(data, cb) {
 
             debugBus(err);
             doSendMessage(err.message, cb, err.status > 399);
+        });
+}
+
+
+function handleWeather(data, cb) {
+
+    debugWeather('Weather request:', data.request);
+
+    weatherApi
+        .checkDate(data.request.intent.slots.Date.value)
+        .then(function(weather) {
+            debugWeather('Weather result:', weather);
+            doSendMessage(weather.text, cb, true);
+        })
+        .catch(function(err) {
+            if (!(err instanceof Error)) {
+                err = new Error(err || 'Sorry, but there was a problem. Can you try again?');
+                err.status = 500;
+            }
+
+            debugWeather(err);
+            doSendMessage(err.message, cb, true);
         });
 }
 
