@@ -9,7 +9,8 @@ const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'F
 const LEADING_WORDS = [
     'Expect {headline} {day}',
     'Prepare for {headline} {day}',
-    '{headline} is in store for us {day}'
+    '{headline} is in store for us {day}',
+    '{day} you can expect {headline}'
 ];
 
 const API_KEY = process.env.WEATHER_API_KEY;
@@ -103,6 +104,68 @@ module.exports = function() {
         return date + data;
     }
 
+
+    /* *************** DAILY SUMMARY ******************** */
+
+    function getDaySummary(date, data) {
+        var day = getDayOfWeek(date);
+        var critical = getCriticalCondition(data);
+        var text = [ getRandomLeadingWords(critical.headline, day) ];
+
+        var conditions = {
+            'precipitation': getDailyPrecipText(data),
+            'temperature': getDailyTemperatureText(data),
+            'humidity': getDailyHumidityText(data),
+            'clouds': getDailyCloudsText(data),
+            'wind': getDailyWindText(data)
+        };
+
+        if (conditions[critical.topic]) {
+            text.push( conditions[critical.topic] );
+            conditions[critical.topic] = null; // nullify it so we don't include it twice
+        }
+
+        shuffle(Object.keys(conditions)).forEach(function(topic) {
+            if (conditions[topic]) {
+                text.push( conditions[topic] );
+            }
+        });
+
+        return text.join('. ');
+    }
+
+    function getCriticalCondition(data) {
+        var condition = {};
+
+        if (data.precipProbability > 0.7 && data.precipIntensityMax > 0.05) {
+            condition.topic = 'precipitation';
+            condition.headline = getPrecipIntensityText(data.precipIntensityMax, data.precipType);
+        } else if (data.temperatureMax > 92) {
+            condition.topic = 'temperature';
+            condition.headline = 'excessive heat';
+        } else if (data.temperatureMax < 35) {
+            condition.topic = 'temperature';
+            condition.headline = 'bitter cold';
+        } else if (data.dewPoint > 73 && data.humidity > 0.75) {
+            condition.topic = 'humidity';
+            condition.headline = 'nasty humidity';
+        } else if (data.cloudCover > 0.85) {
+            condition.topic = 'clouds';
+            condition.headline = 'solid clouds';
+        } else if (data.cloudCover < 0.1) {
+            condition.topic = 'clouds';
+            condition.headline = 'sunny skies';
+        } else if (data.windSpeed > 20) {
+            condition.topic = 'wind';
+            condition.headline = 'gusty conditions';
+        } else {
+            condition.topic = null;
+            condition.headline = 'an average day';
+        }
+
+        return condition;
+    }
+
     /*
     data.daily.data[0] - 7
     {
@@ -136,32 +199,59 @@ module.exports = function() {
     }
      */
 
-    function getDaySummary(date, data) {
-        var day = getDayOfWeek(date);
-        var text = 'Weather.';
+    function getDailyPrecipText(data) {
+        if (data.precipProbability < 15) {
+            return null;
+        }
+        var peak = new Date(data.precipIntensityMaxTime * 1000);
+        peak = peak.getHours() + (peak.getTimezoneOffset() / 60);
+        peak = (peak > 12) ? ((peak - 12) + ' pm') : (peak + 'am');
 
-        if (data.precipProbability > 0.7 && data.precipIntensityMax > 0.05) {
-            text = getRandomLeadingWords('rain', day);
-        } else if (data.temperatureMax > 90) {
-            text = getRandomLeadingWords('a scorcher', day);
-        } else if (data.temperatureMax < 35) {
-            text = getRandomLeadingWords('bitter cold', day);
-        } else if (data.dewPoint > 70) {
-            text = getRandomLeadingWords('nasty humidity', day);
-        } else if (data.cloudCover > 0.85) {
-            text = getRandomLeadingWords('solid clouds', day);
-        } else if (data.cloudCover < 0.1) {
-            text = getRandomLeadingWords('sunny skies', day);
+        return 'There is a ' + (data.precipProbability * 100) + ' percent chance of ' +
+            data.precipType + ' peaking at around ' + peak;
+    }
+
+    function getDailyTemperatureText(data) {
+        var text;
+        if (data.temperatureMax > 90) {
+             text = 'It will reach ' + data.temperatureMax + 'today';
+             if (data.apparentTemperatureMax > (data.temperatureMax + 5)) {
+                 text += ', but it might feel more like ' + data.apparentTemperatureMax;
+             }
+             text += '. Lows will be near ' + data.temperatureMin;
+
+        } else if (data.temperatureMax > 70) {
+            text = 'The high will be ' + data.temperatureMax + 'and the low around ' + data.temperatureMin;
+
+        } else if (data.temperatureMax > 40) {
+            text = 'Temperatures will only get up to ' + data.temperatureMax + ' with lows near ' + data.temperatureMin;
+
         } else {
-            text = day + ' looks to be normal for this time of year. ' +
-                'You can expect a ' + (data.precipProbability * 100) + ' percent chance of ' +
-                getPrecipText(data.precipIntensityMax, data.precipType);
+            text = 'It might only hit ' + data.temperatureMax;
+            if (data.apparentTemperatureMax < (data.temperatureMax - 5)) {
+                text += ', but it might only feel like ' + data.apparentTemperatureMax;
+            }
+            text += '. The low is expected to be ' + data.temperatureMin;
         }
 
         return text;
     }
 
-    function getPrecipText(intensity, type) {
+    function getDailyHumidityText(data) {
+        return 'humid';
+    }
+
+    function getDailyCloudsText(data) {
+        return 'cloudy';
+    }
+
+    function getDailyWindText(data) {
+        return 'windy';
+    }
+
+    /* *************** GENERAL HELPERS ******************** */
+
+    function getPrecipIntensityText(intensity, type) {
         var intensityText = 'no';
         if (intensity > 0.7) {
             intensityText = 'extremely heavy';
@@ -194,6 +284,17 @@ module.exports = function() {
     function getRandomLeadingWords(headline, day) {
         var text = LEADING_WORDS[ Math.floor(Math.random() * LEADING_WORDS.length) ];
         return text.replace('{headline}', headline).replace('{day}', day);
+    }
+
+    function shuffle(a) {
+        var j, x, i;
+        for (i = a.length; i; i--) {
+            j = Math.floor(Math.random() * i);
+            x = a[i - 1];
+            a[i - 1] = a[j];
+            a[j] = x;
+        }
+        return a;
     }
 
 };
