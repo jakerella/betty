@@ -40,6 +40,7 @@ module.exports = function() {
                 'Accept-Encoding': 'gzip'
             }
         }).then(function(data) {
+            debug('Retrieved weather data');
             var text = 'We got some weather.';
             var type = 'summary';
             var simpleDate = d.toISOString().split('T')[0];
@@ -50,7 +51,7 @@ module.exports = function() {
                 text = getHourlySummary(d, data);
                 type = 'hour-by-hour';
 
-            } else if ( (new Date(now.getTime() + 86400000)).toISOString().split('T')[0] ===  simpleDate) {
+            } else if ( (new Date(now.getTime() + 86400000)).toISOString().split('T')[0] === simpleDate) {
                 // for tomorrow, just do day sections (morning, mid-day, afternoon, evening)
                 debug('getting section summary');
                 text = getDaySections(d, data);
@@ -59,8 +60,12 @@ module.exports = function() {
             } else {
                 // for any other day just give the day summary
                 debug('getting daily summary');
-                text = getDaySummary(d, data);
                 type = 'day-summary';
+                data.daily.data.forEach(function(dailyData) {
+                    if ((new Date(dailyData.time * 1000)).toISOString().split('T')[0] === simpleDate) {
+                        text = getDaySummary(d, dailyData);
+                    }
+                });
             }
 
             return {
