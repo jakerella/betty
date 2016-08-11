@@ -100,7 +100,7 @@ function handleWeather(data, cb) {
     debugWeather('Weather request:', data.request);
 
     weatherApi
-        .checkDate(data.request.intent.slots.Date.value)
+        .getWeatherForDate(data.request.intent.slots.Date && data.request.intent.slots.Date.value)
         .then(function(weather) {
             debugWeather('Weather result:', weather);
             doSendMessage(weather.text, cb, true);

@@ -1,8 +1,7 @@
 'use strict';
 
 var debug = require('debug')('betty:weather'),
-    bluebird = require('bluebird'),
-    request = bluebird.promisify(require('request')),
+    request = require('request'),
     appData = require('../../config/data.json');
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -13,81 +12,87 @@ const BASE_URL = 'https://api.forecast.io/forecast/' + API_KEY + '/' + appData.l
 module.exports = function() {
 
     return {
-        checkDate: getWeather
+        getWeatherForDate: getWeatherForDate
     };
 
-    function getWeather(requestedDate) {
-        debug('Getting weather for %s', requestedDate);
+    /* *************** PUBLIC API ******************** */
 
-        var now = new Date();
+    function getWeatherForDate(requestedDate) {
+        return new Promise(function (resolve, reject) {
+            debug('Getting weather for %s', requestedDate);
 
-        if (!API_KEY) {
-            return new Promise(function(resolve, reject) {
-                reject(new Error('Unable to get weather, no API key available!'));
-            });
-        }
+            var now = new Date();
 
-        var d = new Date(requestedDate);
-        if (!d.getTime()) {
-            return new Promise(function(resolve, reject) {
-                reject(new Error('Please provide a valid day to check the weather for!'));
-            });
-        }
-
-        return request({
-            url: BASE_URL,
-            headers: {
-                'Accept-Encoding': 'gzip'
-            }
-        }).then(function(res, body) {
-            debug('Retrieved weather data');
-
-            var data;
-            try {
-                data = JSON.parse(body);
-            } catch(e) {
-                debug('Invalid JSON data from weather API');
-                return {
-                    text: 'Sorry, but there was a problem retrieving weather data.',
-                    type: 'error',
-                    date: null
-                };
+            if (!API_KEY) {
+                return reject(new Error('Unable to get weather, no API key available!'));
             }
 
-            var text = 'We got some weather.';
-            var type = 'summary';
+            var d = new Date(requestedDate);
+            if (!d.getTime()) {
+                return reject(new Error('Please provide a valid day to check the weather for!'));
+            }
             var simpleDate = d.toISOString().split('T')[0];
 
-            if ( now.toISOString().split('T')[0] === simpleDate ) {
-                // for today, use hourly summary
-                debug('getting hourly summary');
-                text = getHourlySummary(d, data);
-                type = 'hour-by-hour';
+            request({
+                url: BASE_URL,
+                headers: {
+                    'Accept-Encoding': 'gzip'
+                }
+            }, function(err, res, body) {
+                debug('Retrieved weather data');
 
-            } else if ( (new Date(now.getTime() + 86400000)).toISOString().split('T')[0] === simpleDate) {
-                // for tomorrow, just do day sections (morning, mid-day, afternoon, evening)
-                debug('getting section summary');
-                text = getDaySections(d, data);
-                type = 'day-section';
+                var data;
+                var text = 'We got some weather.';
+                var type = 'summary';
 
-            } else {
-                // for any other day just give the day summary
-                debug('getting daily summary');
-                type = 'day-summary';
-                data.daily.data.forEach(function(dailyData) {
-                    if ((new Date(dailyData.time * 1000)).toISOString().split('T')[0] === simpleDate) {
-                        text = getDaySummary(d, dailyData);
-                    }
+                if (err) {
+                    debug(err);
+                    return reject(err);
+                } else if (res.statusCode > 299) {
+                    debug('Non-200 status code from weather API:', res.statusCode, body);
+                    return reject(new Error('Sorry, but there was a problem getting weather data.'));
+                }
+
+                try {
+                    data = JSON.parse(body);
+                } catch(e) {
+                    debug('Invalid JSON data from weather API');
+                    return reject(new Error('Sorry, but there was a problem retrieving weather data.'));
+                }
+
+                if ( now.toISOString().split('T')[0] === simpleDate ) {
+                    // for today, use hourly summary
+                    debug('getting hourly summary');
+                    text = getHourlySummary(d, data);
+                    type = 'hour-by-hour';
+
+                } else if ( (new Date(now.getTime() + 86400000)).toISOString().split('T')[0] === simpleDate) {
+                    // for tomorrow, just do day sections (morning, mid-day, afternoon, evening)
+                    debug('getting section summary');
+                    text = getDaySections(d, data);
+                    type = 'day-section';
+
+                } else {
+                    // for any other day just give the day summary
+                    debug('getting daily summary');
+                    type = 'day-summary';
+                    data.daily.data.forEach(function(dailyData) {
+                        if ((new Date(dailyData.time * 1000)).toISOString().split('T')[0] === simpleDate) {
+                            text = getDaySummary(d, dailyData);
+                        }
+                    });
+                }
+
+                resolve({
+                    text: text,
+                    type: type,
+                    date: d
                 });
-            }
-
-            return {
-                text: text,
-                type: type,
-                date: d
-            };
+            });
         });
     }
+
+    /* *************** PRIVATE API HELPERS ******************** */
 
     /*
     data.hourly.data[0] - 48
@@ -111,11 +116,11 @@ module.exports = function() {
     }
      */
 
-    function getHourlySummary(date, data) {
+    function getHourlySummary() {
         return 'Gonna have some weather today!';
     }
 
-    function getDaySections(date, data) {
+    function getDaySections() {
         return 'Gonna have some weather then!';
     }
 
@@ -211,69 +216,40 @@ module.exports = function() {
 
     function getDailyTemperatureText(data) {
         var text;
-        if (data.temperatureMax > 90) {
-             text = 'It will reach ' + data.temperatureMax + 'today';
-             if (data.apparentTemperatureMax > (data.temperatureMax + 5)) {
-                 text += ', but it might feel more like ' + data.apparentTemperatureMax;
+        var min = Math.round(data.temperatureMin);
+        var max = Math.round(data.temperatureMax);
+        var appMax = Math.round(data.apparentTemperatureMax);
+
+        if (max > 90) {
+             text = 'It will reach ' + max + 'today';
+             if (appMax > (max + 5)) {
+                 text += ', but it might feel more like ' + appMax;
              }
-             text += '. Lows will be near ' + data.temperatureMin;
+             text += '. Lows will be near ' + min;
 
-        } else if (data.temperatureMax > 70) {
-            text = 'The high will be ' + data.temperatureMax + 'and the low around ' + data.temperatureMin;
+        } else if (max > 70) {
+            text = 'The high will be ' + max + ' and the low around ' + min;
 
-        } else if (data.temperatureMax > 40) {
-            text = 'Temperatures will only get up to ' + data.temperatureMax + ' with lows near ' + data.temperatureMin;
+        } else if (max > 40) {
+            text = 'Temperatures will only get up to ' + max + ' with lows near ' + min;
 
         } else {
-            text = 'It might only hit ' + data.temperatureMax;
-            if (data.apparentTemperatureMax < (data.temperatureMax - 5)) {
-                text += ', but it might only feel like ' + data.apparentTemperatureMax;
+            text = 'It might only hit ' + max;
+            if (appMax < (max - 5)) {
+                text += ', but it might only feel like ' + appMax;
             }
-            text += '. The low is expected to be ' + data.temperatureMin;
+            text += '. The low is expected to be ' + min;
         }
 
         return text;
     }
-
-    /*
-    data.daily.data[0] - 7
-    {
-        "time":1470801600,
-        "summary":"Light rain starting in the afternoon.",
-        "icon":"rain",
-        "sunriseTime":1470824326,
-        "sunsetTime":1470874240,
-        "moonPhase":0.25,
-        "precipIntensity":0.0037,
-        "precipIntensityMax":0.0158,
-        "precipIntensityMaxTime":1470862800,
-        "precipProbability":0.47,
-        "precipType":"rain",
-        "temperatureMin":74.62,
-        "temperatureMinTime":1470819600,
-        "temperatureMax":91.26,
-        "temperatureMaxTime":1470859200,
-        "apparentTemperatureMin":74.62,
-        "apparentTemperatureMinTime":1470819600,
-        "apparentTemperatureMax":99.53,
-        "apparentTemperatureMaxTime":1470859200,
-        "dewPoint":73.52,
-        "humidity":0.77,
-        "windSpeed":8.16,
-        "windBearing":169,
-        "visibility":10,
-        "cloudCover":0.7,
-        "pressure":1020.36,
-        "ozone":286.23
-    }
-     */
 
     function getDailyHumidityText(data) {
         var text;
 
         if (data.dewPoint > 72 && data.humidity > 0.75) {
             text = 'The relative humidity will be near ' + (data.humidity * 100) +
-                ' percent with the dew point at ' + data.dewPoint;
+                ' percent with the dew point at ' + Math.round(data.dewPoint);
         } else if (data.humidity < 0.4) {
             text = 'It\'s going to be very dry, grab that lotion. The humidity will only be ' + data.humidity;
         }
@@ -285,9 +261,9 @@ module.exports = function() {
         var text;
 
         if (data.windSpeed > 30) {
-            text = 'The wind could be fierce today, reaching speeds near ' + data.windSpeed + ' miles per hour';
+            text = 'The wind could be fierce today, reaching speeds near ' + Math.round(data.windSpeed) + ' miles per hour';
         } else if (data.windSpeed > 20) {
-            text = 'There may be some breezy moments with wind speeds peaking around ' + data.windSpeed + ' miles per hour';
+            text = 'There may be some breezy moments with wind speeds peaking around ' + Math.round(data.windSpeed) + ' miles per hour';
         } else if (data.windSpeed > 10) {
             text = 'There should be a light breeze in the air';
         }
@@ -295,7 +271,7 @@ module.exports = function() {
         return text;
     }
 
-    /* *************** GENERAL HELPERS ******************** */
+    /* *************** OTHER HELPERS ******************** */
 
     function getPrecipIntensityText(intensity, type) {
         var intensityText = 'no';
