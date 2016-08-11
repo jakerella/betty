@@ -39,8 +39,21 @@ module.exports = function() {
             headers: {
                 'Accept-Encoding': 'gzip'
             }
-        }).then(function(data) {
+        }).then(function(res, body) {
             debug('Retrieved weather data');
+
+            var data;
+            try {
+                data = JSON.parse(body);
+            } catch(e) {
+                debug('Invalid JSON data from weather API');
+                return {
+                    text: 'Sorry, but there was a problem retrieving weather data.',
+                    type: 'error',
+                    date: null
+                };
+            }
+
             var text = 'We got some weather.';
             var type = 'summary';
             var simpleDate = d.toISOString().split('T')[0];
