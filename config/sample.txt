@@ -42,6 +42,7 @@ NextBus  when's the next number {Number} bus heading {Stop}
 NextBus  when is the next number {Number} bus heading {Stop}
 
 Weather  about the weather
+Weather  about {Date} weather
 Weather  about the weather {Date}
 Weather  about the weather for {Date}
 Weather  what it's like outside
@@ -52,18 +53,20 @@ Weather  what the weather is like
 Weather  what the weather is like {Date}
 Weather  what's the weather like
 Weather  what's the weather {Date}
+Weather  what's {Date} weather
+Weather  how {Date} will be
+Weather  how {Date} weather will be
 Weather  how's the weather
 Weather  how's the weather {Date}
 Weather  how's the weather for {Date}
-Weather  what should I wear
-Weather  what should I wear {Date}
-Weather  what should I wear for {Date}
 Weather  to tell me the weather
 Weather  to tell me the weather {Date}
 Weather  to tell me the weather for {Date}
+Weather  to tell me {Date} weather
 Weather  to tell me about the weather
 Weather  to tell me about the weather {Date}
 Weather  to tell me about the weather for {Date}
 Weather  to look up the weather
 Weather  to look up the weather {Date}
 Weather  to look up the weather for {Date}
+Weather  to look up {Date} weather

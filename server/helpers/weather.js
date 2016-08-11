@@ -6,12 +6,6 @@ var debug = require('debug')('betty:weather'),
     appData = require('../../config/data.json');
 
 const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const LEADING_WORDS = [
-    'Expect {headline} {day}',
-    'Prepare for {headline} {day}',
-    '{headline} is in store for us {day}',
-    '{day} you can expect {headline}'
-];
 
 const API_KEY = process.env.WEATHER_API_KEY;
 const BASE_URL = 'https://api.forecast.io/forecast/' + API_KEY + '/' + appData.location.lat + ',' + appData.location.lng;
@@ -109,14 +103,13 @@ module.exports = function() {
 
     function getDaySummary(date, data) {
         var day = getDayOfWeek(date);
-        var critical = getCriticalCondition(data);
-        var text = [ getRandomLeadingWords(critical.headline, day) ];
+        var critical = getCriticalDailyCondition(data, day);
+        var text = [ critical.headline ];
 
         var conditions = {
             'precipitation': getDailyPrecipText(data),
             'temperature': getDailyTemperatureText(data),
             'humidity': getDailyHumidityText(data),
-            'clouds': getDailyCloudsText(data),
             'wind': getDailyWindText(data)
         };
 
@@ -134,36 +127,91 @@ module.exports = function() {
         return text.join('. ');
     }
 
-    function getCriticalCondition(data) {
+    function getCriticalDailyCondition(data, day) {
         var condition = {};
 
         if (data.precipProbability > 0.7 && data.precipIntensityMax > 0.05) {
             condition.topic = 'precipitation';
-            condition.headline = getPrecipIntensityText(data.precipIntensityMax, data.precipType);
+            if (data.precipType === 'rain') {
+                condition.headline = 'Don\'t forget your umbrella ' + day;
+            } else {
+                condition.headline = 'Brace yourself for the snow on ' + day;
+            }
         } else if (data.temperatureMax > 92) {
             condition.topic = 'temperature';
-            condition.headline = 'excessive heat';
+            if (data.dewPoint > 72 || data.humidity > 0.75) {
+                condition.headline = 'It\'s going to be nasty ' + day;
+            } else {
+                condition.headline = 'Prepare for a scorcher ' + day;
+            }
         } else if (data.temperatureMax < 35) {
             condition.topic = 'temperature';
-            condition.headline = 'bitter cold';
-        } else if (data.dewPoint > 73 && data.humidity > 0.75) {
+            if (data.windSpeed > 15) {
+                condition.headline = 'Prepare for bitter cold wind in your face ' + day;
+            } else {
+                condition.headline = 'Bitterly cold temperatures are in store for ' + day;
+            }
+        } else if (data.dewPoint > 72 && data.humidity > 0.75) {
             condition.topic = 'humidity';
-            condition.headline = 'nasty humidity';
+            condition.headline = 'The humidity is going to be brutal ' + day;
         } else if (data.cloudCover > 0.85) {
             condition.topic = 'clouds';
-            condition.headline = 'solid clouds';
+            condition.headline = day + ' will be very cloudy';
         } else if (data.cloudCover < 0.1) {
             condition.topic = 'clouds';
-            condition.headline = 'sunny skies';
+            if (data.windSpeed > 15) {
+                condition.headline = 'Lots of sun and breezy conditions are in store for ' + day;
+            } else {
+                condition.headline = day + ' will bring lots of sunshine';
+            }
         } else if (data.windSpeed > 20) {
             condition.topic = 'wind';
-            condition.headline = 'gusty conditions';
+            condition.headline = 'It\'s going to be gusty ' + day;
         } else {
             condition.topic = null;
-            condition.headline = 'an average day';
+            condition.headline = 'Looks like an average day on ' + day;
         }
 
         return condition;
+    }
+
+    function getDailyPrecipText(data) {
+        if (data.precipProbability < 15) {
+            return null;
+        }
+        var peak = new Date(data.precipIntensityMaxTime * 1000);
+        peak = peak.getHours() + (peak.getTimezoneOffset() / 60);
+        peak = (peak > 12) ? ((peak - 12) + ' pm') : (peak + 'am');
+
+        return 'You should expect ' + getPrecipIntensityText(data.precipIntensityMax, data.precipType) + '. ' +
+            'There is a ' + (data.precipProbability * 100) + ' percent chance ' +
+            ' peaking at around ' + peak;
+    }
+
+    function getDailyTemperatureText(data) {
+        var text;
+        if (data.temperatureMax > 90) {
+             text = 'It will reach ' + data.temperatureMax + 'today';
+             if (data.apparentTemperatureMax > (data.temperatureMax + 5)) {
+                 text += ', but it might feel more like ' + data.apparentTemperatureMax;
+             }
+             text += '. Lows will be near ' + data.temperatureMin;
+
+        } else if (data.temperatureMax > 70) {
+            text = 'The high will be ' + data.temperatureMax + 'and the low around ' + data.temperatureMin;
+
+        } else if (data.temperatureMax > 40) {
+            text = 'Temperatures will only get up to ' + data.temperatureMax + ' with lows near ' + data.temperatureMin;
+
+        } else {
+            text = 'It might only hit ' + data.temperatureMax;
+            if (data.apparentTemperatureMax < (data.temperatureMax - 5)) {
+                text += ', but it might only feel like ' + data.apparentTemperatureMax;
+            }
+            text += '. The low is expected to be ' + data.temperatureMin;
+        }
+
+        return text;
     }
 
     /*
@@ -199,54 +247,31 @@ module.exports = function() {
     }
      */
 
-    function getDailyPrecipText(data) {
-        if (data.precipProbability < 15) {
-            return null;
-        }
-        var peak = new Date(data.precipIntensityMaxTime * 1000);
-        peak = peak.getHours() + (peak.getTimezoneOffset() / 60);
-        peak = (peak > 12) ? ((peak - 12) + ' pm') : (peak + 'am');
-
-        return 'There is a ' + (data.precipProbability * 100) + ' percent chance of ' +
-            data.precipType + ' peaking at around ' + peak;
-    }
-
-    function getDailyTemperatureText(data) {
+    function getDailyHumidityText(data) {
         var text;
-        if (data.temperatureMax > 90) {
-             text = 'It will reach ' + data.temperatureMax + 'today';
-             if (data.apparentTemperatureMax > (data.temperatureMax + 5)) {
-                 text += ', but it might feel more like ' + data.apparentTemperatureMax;
-             }
-             text += '. Lows will be near ' + data.temperatureMin;
 
-        } else if (data.temperatureMax > 70) {
-            text = 'The high will be ' + data.temperatureMax + 'and the low around ' + data.temperatureMin;
-
-        } else if (data.temperatureMax > 40) {
-            text = 'Temperatures will only get up to ' + data.temperatureMax + ' with lows near ' + data.temperatureMin;
-
-        } else {
-            text = 'It might only hit ' + data.temperatureMax;
-            if (data.apparentTemperatureMax < (data.temperatureMax - 5)) {
-                text += ', but it might only feel like ' + data.apparentTemperatureMax;
-            }
-            text += '. The low is expected to be ' + data.temperatureMin;
+        if (data.dewPoint > 72 && data.humidity > 0.75) {
+            text = 'The relative humidity will be near ' + (data.humidity * 100) +
+                ' percent with the dew point at ' + data.dewPoint;
+        } else if (data.humidity < 0.4) {
+            text = 'It\'s going to be very dry, grab that lotion. The humidity will only be ' + data.humidity;
         }
 
         return text;
     }
 
-    function getDailyHumidityText(data) {
-        return 'humid';
-    }
-
-    function getDailyCloudsText(data) {
-        return 'cloudy';
-    }
-
     function getDailyWindText(data) {
-        return 'windy';
+        var text;
+
+        if (data.windSpeed > 30) {
+            text = 'The wind could be fierce today, reaching speeds near ' + data.windSpeed + ' miles per hour';
+        } else if (data.windSpeed > 20) {
+            text = 'There may be some breezy moments with wind speeds peaking around ' + data.windSpeed + ' miles per hour';
+        } else if (data.windSpeed > 10) {
+            text = 'There should be a light breeze in the air';
+        }
+
+        return text;
     }
 
     /* *************** GENERAL HELPERS ******************** */
@@ -279,11 +304,6 @@ module.exports = function() {
             day = DAYS_OF_WEEK[date.getDay()];
         }
         return day;
-    }
-
-    function getRandomLeadingWords(headline, day) {
-        var text = LEADING_WORDS[ Math.floor(Math.random() * LEADING_WORDS.length) ];
-        return text.replace('{headline}', headline).replace('{day}', day);
     }
 
     function shuffle(a) {
