@@ -46,16 +46,19 @@ module.exports = function() {
 
             if ( now.toISOString().split('T')[0] === simpleDate ) {
                 // for today, use hourly summary
+                debug('getting hourly summary');
                 text = getHourlySummary(d, data);
                 type = 'hour-by-hour';
 
             } else if ( (new Date(now.getTime() + 86400000)).toISOString().split('T')[0] ===  simpleDate) {
                 // for tomorrow, just do day sections (morning, mid-day, afternoon, evening)
+                debug('getting section summary');
                 text = getDaySections(d, data);
                 type = 'day-section';
 
             } else {
                 // for any other day just give the day summary
+                debug('getting daily summary');
                 text = getDaySummary(d, data);
                 type = 'day-summary';
             }
@@ -91,11 +94,11 @@ module.exports = function() {
      */
 
     function getHourlySummary(date, data) {
-        return date + data;
+        return 'Gonna have some weather today!';
     }
 
     function getDaySections(date, data) {
-        return date + data;
+        return 'Gonna have some weather then!';
     }
 
 
