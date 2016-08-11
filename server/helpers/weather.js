@@ -34,10 +34,7 @@ module.exports = function() {
             var simpleDate = d.toISOString().split('T')[0];
 
             request({
-                url: BASE_URL,
-                headers: {
-                    'Accept-Encoding': 'gzip'
-                }
+                url: BASE_URL
             }, function(err, res, body) {
                 debug('Retrieved weather data');
 
