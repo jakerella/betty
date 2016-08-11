@@ -160,7 +160,7 @@ module.exports = function() {
             } else {
                 condition.headline = 'Brace yourself for the snow on ' + day;
             }
-        } else if (data.temperatureMax > 92) {
+        } else if (data.temperatureMax > 93 || data.apparentTemperatureMax > 98) {
             condition.topic = 'temperature';
             if (data.dewPoint > 72 || data.humidity > 0.75) {
                 condition.headline = 'It\'s going to be nasty ' + day;
@@ -218,7 +218,7 @@ module.exports = function() {
         var appMax = Math.round(data.apparentTemperatureMax);
 
         if (max > 90) {
-             text = 'It will reach ' + max + 'today';
+             text = 'It will reach ' + max + ' degrees';
              if (appMax > (max + 5)) {
                  text += ', but it might feel more like ' + appMax;
              }
