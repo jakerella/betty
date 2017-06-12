@@ -4,7 +4,8 @@ var debug = require('debug')('betty:transit:was'),
     request = require('request');
 
 var API_KEY = process.env.TRANSIT_KEY_WAS,
-    BASE_URL = 'https://api.wmata.com/NextBusService.svc/json/jPredictions';
+    BASE_URL = 'https://api.wmata.com/NextBusService.svc/json/jPredictions',
+    MINUTE_MAX = 25;
 
 
 module.exports = function() {
@@ -29,7 +30,7 @@ module.exports = function() {
                     'api_key': API_KEY
                 }
             }, function(err, res, body) {
-                var data, result;
+                var data, buses;
 
                 if (err) {
                     debug(err);
@@ -50,17 +51,19 @@ module.exports = function() {
                     return resolve({ noData: true });
                 }
 
-                result = data.Predictions[0];
+                buses = data.Predictions
+                    .filter(function(bus) {
+                        return bus.Minutes < MINUTE_MAX;
+                    })
+                    .map(function(bus) {
+                        return { route: bus.RouteID, time: bus.Minutes };
+                    });
 
-                if (!result) {
+                if (!buses.length) {
                     return resolve({ noData: true });
                 }
 
-                resolve({
-                    busNumber: result.RouteID,
-                    time:  result.Minutes + ' minutes'
-                });
-
+                resolve(buses);
             });
 
         });

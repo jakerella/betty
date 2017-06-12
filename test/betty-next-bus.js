@@ -56,17 +56,17 @@ describe('NextBus intent', function() {
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'The next X2 bus will arrive in 5 minutes.');
+                assert.equal(res.body.response.outputSpeech.text, 'Here are the next 2 buses. X2 arriving in 1 minute. X1 arriving in 19 minutes');
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);
     });
 
-    it('should succeed with just a stop name', function(done) {
+    it('should succeed with many upcoming buses', function(done) {
 
         nock('https://api.wmata.com')
             .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
-            .reply(200, require('./data/wmata.nextbus.json'));
+            .reply(200, require('./data/wmata.nextbus-many.json'));
 
 
         request(server)
@@ -80,7 +80,55 @@ describe('NextBus intent', function() {
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'The next X2 bus will arrive in 5 minutes.');
+                assert.equal(res.body.response.outputSpeech.text, 'Here are the next 2 buses. X2 arriving in 1 minute. X1 arriving in 19 minutes');
+                assert.equal(res.body.response.shouldEndSession, true);
+            })
+            .expect(200, done);
+    });
+
+    it('should succeed with only one upcoming bus', function(done) {
+
+        nock('https://api.wmata.com')
+            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
+            .reply(200, require('./data/wmata.nextbus-one.json'));
+
+
+        request(server)
+            .post('/voice/betty')
+            .set('SignatureCertChainUrl', LOCAL_CERT)
+            .set('Signature', SIGNATURE)
+            .send(generate.getIntentRequest({
+                name: 'NextBus',
+                slots: { 'Route': TEST_STOP_NAME }
+            }))
+            .expect('Content-Type', /json/)
+            .expect(function(res) {
+                assertEchoResponseFormat(res.body);
+                assert.equal(res.body.response.outputSpeech.text, 'Here is the next bus. X2 arriving in 5 minutes');
+                assert.equal(res.body.response.shouldEndSession, true);
+            })
+            .expect(200, done);
+    });
+
+    it('should succeed with zero upcoming buses', function(done) {
+
+        nock('https://api.wmata.com')
+            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
+            .reply(200, require('./data/wmata.nextbus-zero.json'));
+
+
+        request(server)
+            .post('/voice/betty')
+            .set('SignatureCertChainUrl', LOCAL_CERT)
+            .set('Signature', SIGNATURE)
+            .send(generate.getIntentRequest({
+                name: 'NextBus',
+                slots: { 'Route': TEST_STOP_NAME }
+            }))
+            .expect('Content-Type', /json/)
+            .expect(function(res) {
+                assertEchoResponseFormat(res.body);
+                assert.equal(res.body.response.outputSpeech.text, 'Sorry, but there are no buses scheduled to arrive soon on that route.');
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);

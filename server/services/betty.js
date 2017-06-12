@@ -72,11 +72,17 @@ function handleNextBus(data, cb) {
         .then(function(transitData) {
 
             if (transitData.noData) {
-                return doSendMessage('Sorry, but there are no buses scheduled to arrive soon.', cb, true);
+                return doSendMessage('Sorry, but there are no buses scheduled to arrive soon on that route.', cb, true);
             }
 
-            doSendMessage('The next ' + transitData.busNumber + ' bus will arrive in ' + transitData.time + '.', cb, true);
+            var text = transitData.map(function(bus) {
+                return `${bus.route} arriving in ${bus.time} minute${(bus.time === 1) ? '' : 's'}`;
+            });
+            /* jshint maxlen:200 */
+            text = [`Here ${(transitData.length > 1) ? 'are' : 'is'} the next ${(transitData.length > 1) ? transitData.length+' ' : ''}bus${(transitData.length > 1) ? 'es' : ''}`, ...text];
+            /* jshint maxlen:140 */
 
+            doSendMessage(text.join('. '), cb, true);
         })
         .catch(function(err) {
             if (!(err instanceof Error)) {
