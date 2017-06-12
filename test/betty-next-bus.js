@@ -10,11 +10,10 @@ var path = require('path'),
 var LOCAL_CERT = 'file://' + path.resolve('test/data/echo-api.pem'),
     SIGNATURE = 'this is a test signature',
     // TEST_USER_ID = 'amzn1.account.AM3B00000000000000000000013',
-    TEST_STOP_NAME = 'north',
-    TEST_STOP_ID = 1002716;
+    TEST_STOP_NAME = 'X2',
+    TEST_STOP_ID = 1001113;
 
 function assertEchoResponseFormat(data) {
-    assert.equal(data.version, '2.0');
     assert.ok(data.sessionAttributes);
     assert.ok(data.response);
     assert.equal(data.response.outputSpeech.type, 'PlainText');
@@ -30,12 +29,12 @@ describe('NextBus intent', function() {
             .set('Signature', SIGNATURE)
             .send(generate.getIntentRequest({
                 name: 'NextBus',
-                slots: { 'Stop': 'wut' }
+                slots: { 'Route': 'wut' }
             }))
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'Sorry, but I don\'t know about that bus stop, have you saved it yet?');
+                assert.equal(res.body.response.outputSpeech.text, 'Sorry, but I don\'t know about that bus route.');
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);
@@ -57,7 +56,7 @@ describe('NextBus intent', function() {
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'The next 62 bus will arrive in 5 minutes.');
+                assert.equal(res.body.response.outputSpeech.text, 'The next X2 bus will arrive in 5 minutes.');
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);
@@ -76,58 +75,12 @@ describe('NextBus intent', function() {
             .set('Signature', SIGNATURE)
             .send(generate.getIntentRequest({
                 name: 'NextBus',
-                slots: { 'Stop': TEST_STOP_NAME }
+                slots: { 'Route': TEST_STOP_NAME }
             }))
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'The next 62 bus will arrive in 5 minutes.');
-                assert.equal(res.body.response.shouldEndSession, true);
-            })
-            .expect(200, done);
-    });
-
-    it('should succeed with a stop name and bus number', function(done) {
-
-        nock('https://api.wmata.com')
-            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
-            .reply(200, require('./data/wmata.nextbus.json'));
-
-        request(server)
-            .post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({
-                name: 'NextBus',
-                slots: { 'Stop': TEST_STOP_NAME, 'Number': 63 }
-            }))
-            .expect('Content-Type', /json/)
-            .expect(function(res) {
-                assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'The next 63 bus will arrive in 13 minutes.');
-                assert.equal(res.body.response.shouldEndSession, true);
-            })
-            .expect(200, done);
-    });
-
-    it('should find no data with bad bus number', function(done) {
-
-        nock('https://api.wmata.com')
-            .get('/NextBusService.svc/json/jPredictions?StopID=' + TEST_STOP_ID)
-            .reply(200, require('./data/wmata.nextbus.json'));
-
-        request(server)
-            .post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({
-                name: 'NextBus',
-                slots: { 'Stop': TEST_STOP_NAME, 'Number': 99 }
-            }))
-            .expect('Content-Type', /json/)
-            .expect(function(res) {
-                assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'Sorry, but there are no 99 buses scheduled to arrive soon.');
+                assert.equal(res.body.response.outputSpeech.text, 'The next X2 bus will arrive in 5 minutes.');
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);

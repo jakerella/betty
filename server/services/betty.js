@@ -50,34 +50,29 @@ function handleSessionEndedRequest(data, cb) {
 
 function handleNextBus(data, cb) {
     var stopId,
-        slots = data.request.intent.slots || {},
-        busNumber = slots.Number && (Number(slots.Number.value) || slots.Number.value);
+        slots = data.request.intent.slots || {};
 
     debugBus('Bus request:', data.request);
 
-    if (slots.Stop && slots.Stop.value) {
-        stopId = appData.stops[slots.Stop.value];
+    if (slots.Route && slots.Route.value) {
+        stopId = appData.Route[slots.Route.value];
     } else {
         debugBus('No bus stop specified, using default');
-        stopId = appData.stops[appData.stops.default];
+        stopId = appData.Route[appData.Route.default];
     }
 
     if (!stopId) {
         debugBus('Bus stop not saved');
-        return doSendMessage('Sorry, but I don\'t know about that bus stop, have you saved it yet?', cb, true);
+        return doSendMessage('Sorry, but I don\'t know about that bus route.', cb, true);
     }
 
-    debugBus('Looking for next bus', stopId, busNumber);
+    debugBus('Looking for next bus at ', stopId);
 
-    transitApi.getNextBus(stopId, busNumber)
+    transitApi.getNextBus(stopId)
         .then(function(transitData) {
 
             if (transitData.noData) {
-                if (busNumber) {
-                    return doSendMessage('Sorry, but there are no ' + busNumber + ' buses scheduled to arrive soon.', cb, true);
-                } else {
-                    return doSendMessage('Sorry, but there are no buses scheduled to arrive soon.', cb, true);
-                }
+                return doSendMessage('Sorry, but there are no buses scheduled to arrive soon.', cb, true);
             }
 
             doSendMessage('The next ' + transitData.busNumber + ' bus will arrive in ' + transitData.time + '.', cb, true);

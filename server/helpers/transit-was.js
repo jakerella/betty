@@ -14,11 +14,10 @@ module.exports = function() {
         return null;
     }
 
-
-    function getNextBus(stopId, busNumber) {
+    function getNextBus(stopId) {
         return new Promise(function (resolve, reject) {
 
-            debug('Getting next bus for stop', stopId, busNumber);
+            debug('Getting next bus for stop', stopId);
 
             if (!stopId) {
                 return reject(new Error('Please provide a stop ID to check.'));
@@ -30,7 +29,7 @@ module.exports = function() {
                     'api_key': API_KEY
                 }
             }, function(err, res, body) {
-                var i, l, data, result;
+                var data, result;
 
                 if (err) {
                     debug(err);
@@ -52,16 +51,6 @@ module.exports = function() {
                 }
 
                 result = data.Predictions[0];
-
-                if (busNumber) {
-                    result = null;
-                    for(i=0, l=data.Predictions.length; i<l; ++i) {
-                        if (data.Predictions[i].RouteID === (''+busNumber)) {
-                            result = data.Predictions[i];
-                            break;
-                        }
-                    }
-                }
 
                 if (!result) {
                     return resolve({ noData: true });

@@ -10,12 +10,8 @@
       "intent": "NextBus",
       "slots": [
         {
-          "name": "Stop",
-          "type": "BUS_STOP"
-        },
-        {
-          "name": "Number",
-          "type": "BUS_NUMBER"
+          "name": "Route",
+          "type": "BUS_ROUTE"
         }
       ]
     },

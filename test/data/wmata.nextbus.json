@@ -1,37 +1,37 @@
 {
-    "StopName":"5th St + Rittenhouse St",
-    "Predictions":[
-        {
-            "RouteID":"62",
-            "DirectionText":"South to Georgia Ave/Petworth",
-            "DirectionNum":"1",
-            "Minutes":5,
-            "VehicleID":"6518",
-            "TripID":"7358278"
-        },
-        {
-            "RouteID":"63",
-            "DirectionText":"South to Federal Triangle",
-            "DirectionNum":"1",
-            "Minutes":13,
-            "VehicleID":"3009",
-            "TripID":"7358815"
-        },
-        {
-            "RouteID":"62",
-            "DirectionText":"South to Georgia Ave/Petworth",
-            "DirectionNum":"1",
-            "Minutes":27,
-            "VehicleID":"4568",
-            "TripID":"7358359"
-        },
-        {
-            "RouteID":"63",
-            "DirectionText":"South to Federal Triangle",
-            "DirectionNum":"1",
-            "Minutes":32,
-            "VehicleID":"3045",
-            "TripID":"7358817"
-        }
-    ]
+  "StopName": "Benning Rd Ne + 16th St Ne",
+  "Predictions": [
+    {
+      "RouteID": "X2",
+      "DirectionText": "West to Lafayette Square",
+      "DirectionNum": "1",
+      "Minutes": 5,
+      "VehicleID": "5411",
+      "TripID": "914300220"
+    },
+    {
+      "RouteID": "X1",
+      "DirectionText": "West to Foggy Bottom",
+      "DirectionNum": "1",
+      "Minutes": 19,
+      "VehicleID": "5452",
+      "TripID": "914300020"
+    },
+    {
+      "RouteID": "X9",
+      "DirectionText": "West to Metro Center",
+      "DirectionNum": "1",
+      "Minutes": 29,
+      "VehicleID": "5408",
+      "TripID": "914299920"
+    },
+    {
+      "RouteID": "X2",
+      "DirectionText": "West to Gallery Place",
+      "DirectionNum": "1",
+      "Minutes": 43,
+      "VehicleID": "5415",
+      "TripID": "914299620"
+    }
+  ]
 }

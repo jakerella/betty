@@ -1,45 +1,49 @@
 
+BUS_ROUTE
+---
+D six
+X two
+X one
+X nine
+H Street
+D Street
+
+
+NextBus  bus info
+NextBus  bus information
+NextBus  bus details
 NextBus  next bus
-NextBus  next bus {Stop}
+NextBus  {Route} bus
+NextBus  next {Route} bus
 NextBus  about the next bus
+NextBus  about the next {Route} bus
 NextBus  when is the next bus
 NextBus  when's the next bus
-NextBus  when is the next bus {Stop}
-NextBus  when's the next bus {Stop}
+NextBus  when's the next {Route} bus
+NextBus  when is the next {Route} bus
+NextBus  when's the next {Route} bus
 NextBus  how long until the next bus
 NextBus  how long til the next bus
-NextBus  how long until the next bus {Stop}
-NextBus  how long til the next bus {Stop}
-NextBus  when is the next {Number} bus
-NextBus  when's the next {Number} bus
-NextBus  when's the next number {Number} bus
-NextBus  how long until the next {Number} bus
-NextBus  how long until the next number {Number} bus
-NextBus  when is the next {Number} bus
-NextBus  when is the next number {Number} bus
-NextBus  when is the next number {Number} bus
+NextBus  how long until the next {Route} bus
+NextBus  how long til the next {Route} bus
 NextBus  when the next bus is arriving
 NextBus  when will the next bus arrive
 NextBus  how long until the next bus arrives
 NextBus  how long til the next bus arrives
-NextBus  when is the next number {Number} bus arriving
-NextBus  when's the next number {Number} bus arriving
-NextBus  when is the next {Number} bus arriving
-NextBus  when is the next {Number} bus arriving
+NextBus  when is the next {Route} bus arriving
+NextBus  when is the next {Route} bus arriving
 NextBus  tell me when the next bus arrives
 NextBus  tell me when the next bus is arriving
-NextBus  when is the next bus {Stop}
-NextBus  when's the next bus {Stop}
-NextBus  when will the next bus heading {Stop} arrive
-NextBus  when the next bus will arrive heading {Stop}
-NextBus  when will the next bus arrive heading {Stop}
-NextBus  when is the next {Number} bus heading {Stop}
-NextBus  when's the next {Number} bus heading {Stop}
-NextBus  when's the next {Number} bus heading {Stop}
-NextBus  when is the next number {Number} bus heading {Stop}
-NextBus  when is the next number {Number} bus heading {Stop}
-NextBus  when's the next number {Number} bus heading {Stop}
-NextBus  when is the next number {Number} bus heading {Stop}
+NextBus  when is the next bus at {Route}
+NextBus  when's the next bus at {Route}
+NextBus  when is the next bus on {Route}
+NextBus  when's the next bus on {Route}
+NextBus  when is the next bus going down {Route}
+NextBus  when's the next bus going down {Route}
+NextBus  when will the next bus heading down {Route} arrive
+NextBus  when the next bus will arrive heading down {Route}
+NextBus  when will the next bus arrive heading down {Route}
+
 
 Weather  about the weather
 Weather  about {Date} weather
