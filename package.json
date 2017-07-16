@@ -32,6 +32,6 @@
     "devtest": "mocha --watch test/"
   },
   "engines": {
-    "node": "6.2.1"
+    "node": "6.11.1"
   }
 }
