@@ -8,9 +8,11 @@ var path = require('path'),
     appData = require('../config/data.json'),
     generate = require('./data/generate.js')('amzn1.echo-sdk-ams.app.000000-d0ed-0000-ad00-0000000betty');
 
-var LOCAL_CERT = 'file://' + path.resolve('test/data/echo-api.pem'),
-    SIGNATURE = 'this is a test signature';
-    // TEST_USER_ID = 'amzn1.account.AM3B00000000000000000000013'
+const LOCAL_CERT = 'file://' + path.resolve('test/data/echo-api.pem'),
+      SIGNATURE = 'this is a test signature';
+      // TEST_USER_ID = 'amzn1.account.AM3B00000000000000000000013'
+
+const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function assertEchoResponseFormat(data) {
     assert.equal(data.version, '2.0');
@@ -56,55 +58,23 @@ describe('Weather intent', function() {
             });
     });
 
-    it('should fail if there is no date', function(done) {
-        request(server)
-            .post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({
-                name: 'Weather',
-                slots: {}
-            }))
-            .expect('Content-Type', /json/)
-            .expect(function(res) {
-                assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'Please provide a valid day to check the weather for!');
-                assert.equal(res.body.response.shouldEndSession, true);
-            })
-            .expect(200, done);
-    });
-
-    it('should fail if there is an invalid date', function(done) {
-        request(server)
-            .post('/voice/betty')
-            .set('SignatureCertChainUrl', LOCAL_CERT)
-            .set('Signature', SIGNATURE)
-            .send(generate.getIntentRequest({
-                name: 'Weather',
-                slots: { 'Date': 'Invalid Date' }
-            }))
-            .expect('Content-Type', /json/)
-            .expect(function(res) {
-                assertEchoResponseFormat(res.body);
-                assert.equal(res.body.response.outputSpeech.text, 'Please provide a valid day to check the weather for!');
-                assert.equal(res.body.response.shouldEndSession, true);
-            })
-            .expect(200, done);
-    });
-
     it('should summarize for a day past tomorrow', function(done) {
+        let day = new Date(Date.now() + (86400000 * 3));
+        let date = day.toISOString().split(/\./)[0];
+        let weekday = DAYS_OF_WEEK[day.getDay()];
+
         request(server)
             .post('/voice/betty')
             .set('SignatureCertChainUrl', LOCAL_CERT)
             .set('Signature', SIGNATURE)
             .send(generate.getIntentRequest({
                 name: 'Weather',
-                slots: { 'Date': '2016-08-15T14:00:00' }
+                slots: { 'Date': date }
             }))
             .expect('Content-Type', /json/)
             .expect(function(res) {
                 assertEchoResponseFormat(res.body);
-                assert.ok(res.body.response.outputSpeech.text.indexOf('Monday') > -1);
+                assert.ok(res.body.response.outputSpeech.text.indexOf(weekday) > -1);
                 assert.equal(res.body.response.shouldEndSession, true);
             })
             .expect(200, done);

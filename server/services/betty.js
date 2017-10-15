@@ -4,7 +4,13 @@ var debug = require('debug')('betty:service'),
     debugBus = require('debug')('betty:service:bus'),
     debugWeather = require('debug')('betty:service:weather'),
     transitApi = require('../helpers/transit-was')(),
-    weatherApi = require('../helpers/weather')(),
+    weatherApi = require('fuzzy-weather')({
+        apiKey: process.env.WEATHER_API_KEY,
+        location: {
+            lat: 38.9649734,
+            lng: -77.0207249
+        }
+    }),
     appData = require('../../config/data.json');
 
 module.exports = {
@@ -97,14 +103,12 @@ function handleNextBus(data, cb) {
 
 
 function handleWeather(data, cb) {
-
     debugWeather('Weather request:', data.request);
 
-    weatherApi
-        .getWeatherForDate(data.request.intent.slots.Date && data.request.intent.slots.Date.value)
+    weatherApi(data.request.intent.slots.Date.value)
         .then(function(weather) {
             debugWeather('Weather result:', weather);
-            doSendMessage(weather.text, cb, true);
+            doSendMessage(weather.dailySummary.forecast, cb, true);
         })
         .catch(function(err) {
             if (!(err instanceof Error)) {
