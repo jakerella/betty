@@ -58,6 +58,28 @@ describe('Weather intent', function() {
             });
     });
 
+    it('should get hour by hour for tomorrow', function(done) {
+        let day = new Date(Date.now() + 86400000);
+        let date = day.toISOString().split(/\./)[0];
+
+        request(server)
+            .post('/voice/betty')
+            .set('SignatureCertChainUrl', LOCAL_CERT)
+            .set('Signature', SIGNATURE)
+            .send(generate.getIntentRequest({
+                name: 'Weather',
+                slots: { 'Date': date }
+            }))
+            .expect('Content-Type', /json/)
+            .expect(function(res) {
+                assertEchoResponseFormat(res.body);
+                console.log('the text:', res.body.response.outputSpeech.text);
+                assert.ok(res.body.response.outputSpeech.text.indexOf('tomorrow') > -1);
+                assert.equal(res.body.response.shouldEndSession, true);
+            })
+            .expect(200, done);
+    });
+
     it('should summarize for a day past tomorrow', function(done) {
         let day = new Date(Date.now() + (86400000 * 3));
         let date = day.toISOString().split(/\./)[0];

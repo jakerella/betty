@@ -108,7 +108,16 @@ function handleWeather(data, cb) {
     weatherApi(data.request.intent.slots.Date.value)
         .then(function(weather) {
             debugWeather('Weather result:', weather);
-            doSendMessage(weather.dailySummary.forecast, cb, true);
+
+            let simpleDate = data.request.intent.slots.Date.value.split(/T/)[0];
+            let today = (new Date(Date.now() - (3600000 * 4))).toISOString().split(/T/)[0];
+            let tomorrow = (new Date((Date.now() - (3600000 * 4)) + 86400000)).toISOString().split(/T/)[0];
+
+            if (simpleDate === today || simpleDate === tomorrow) {
+                doSendMessage(weather.hourByHour.forecast, cb, true);
+            } else {
+                doSendMessage(weather.dailySummary.forecast, cb, true);
+            }
         })
         .catch(function(err) {
             if (!(err instanceof Error)) {
