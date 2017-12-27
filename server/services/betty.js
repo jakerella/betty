@@ -109,7 +109,9 @@ function handleWeather(data, cb) {
         .then(function(weather) {
             debugWeather('Weather result:', weather);
 
-            let simpleDate = data.request.intent.slots.Date.value.split(/T/)[0];
+            let reqDate = data.request.intent.slots.Date && data.request.intent.slots.Date.value;
+            reqDate = reqDate || (new Date(Date.now() - (3600000 * 4))).toISOString();
+            let simpleDate = reqDate.split(/T/)[0];
             let today = (new Date(Date.now() - (3600000 * 4))).toISOString().split(/T/)[0];
             let tomorrow = (new Date((Date.now() - (3600000 * 4)) + 86400000)).toISOString().split(/T/)[0];
 
